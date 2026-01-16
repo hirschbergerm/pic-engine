@@ -1,3 +1,5 @@
+#include "field.hpp"
+
 #ifndef WORLD_HPP
 #define WORLD_HPP
 
@@ -19,13 +21,19 @@ class World {
     private:
 
         const int nn[3]; // Number of cells along each dimension [ni, nj, nk]
-        const int ni, nj, nk;
+        const int _ni, _nj, _nk;
 
         // The origin is always in the bottom corner of the simulation domain. It is NOT centered in a box.
         double x0[3]; // Origin
         double dh[3]; // Cell size along each dimension [dx, dy, dz]
         double xmax[3]; // Maximum coordinate along each dimension
         double xc[3]; // Domain centroid
+
+        // Fields
+        Field _phi; // Electric potential
+        Field _rho; // Charge density
+        Field3 _E; // Electric field
+
 };
 
 #endif 

@@ -1,10 +1,14 @@
 #include "world.hpp"
 
 World::World(const int& ni, const int& nj, const int& nk) : 
-    ni(ni), 
-    nj(nj), 
-    nk(nk), 
-    nn{ni, nj, nk} {}
+    _ni(ni), 
+    _nj(nj), 
+    _nk(nk), 
+    nn{ni, nj, nk},
+    _phi(ni, nj, nk),
+    _rho(ni, nj, nk),
+    _E(ni, nj, nk) 
+    {}
 
 World::~World() {
 
@@ -23,9 +27,9 @@ void World::setExtents(const double& x1, const double& y1, const double& z1, con
     xmax[2] = z2;
 
     // Compute the cell spacings
-    dh[0] = (xmax[0] - x0[0]) / ni; // You will need static_cast here
-    dh[1] = (xmax[1] - x0[1]) / nj;
-    dh[2] = (xmax[2] - x0[2]) / nk;
+    dh[0] = (xmax[0] - x0[0]) / _ni; // You will need static_cast here
+    dh[1] = (xmax[1] - x0[1]) / _nj;
+    dh[2] = (xmax[2] - x0[2]) / _nk;
 
     // Compute the domain centroid
     // This is solely needed for loading the electron population
