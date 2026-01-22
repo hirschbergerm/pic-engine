@@ -13,11 +13,14 @@ class Field {
         // Field operator+=(const Field& other); // Add two fields 
         double& operator()(const int& i, const int& j, const int& k); // Read-Write Field access operator for value at (i,j,k)
 
+        void scatter(const Eigen::Vector3d& l, const double& value); 
+
     private:
         Eigen::Tensor<double, 3> _data; // 3D field data
 
     protected:
         const int _ni, _nj, _nk;
+
 };
 
 

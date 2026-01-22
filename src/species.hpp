@@ -14,8 +14,7 @@ class Species {
         //Species(const Species& other) = default; // Copy Constructor
 
         // Public Methods
-        void addParticle(const Eigen::Vector3d& pos, Eigen::Vector3d& vel, double mpwt);
-        void loadParticlesBox(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, int num_particles); 
+        void load_particles_box(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, int num_particles); 
 
         const std::string name;
         const double charge; 

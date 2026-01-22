@@ -14,7 +14,11 @@ class World {
 
         World(const World& other) = delete; // Delete copy consturctor
         World& operator=(const World& other) = delete; // Delete copy assignment operator 
-        World(World&& other) = delete;// Delete the move constructor
+        World(World&& other) = delete;// Delete move constructor
+
+        const Eigen::Vector3d XtoL(const Eigen::Vector3d& x);
+        const Eigen::Vector3d get_dh();
+        const Eigen::Vector3d get_origin();
 
         void setExtents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
@@ -38,5 +42,27 @@ class World {
         std::vector<class Species*> _species;
 
 };
+
+// Making a choice here to have Rnd managed by the World header. Might revisit this later.
+// I do want this to be a singleton.
+class Rnd {
+    public:
+        Rnd() : _mt_gen{std::random_device()()}, _rnd_dist{0, 1.0} {};
+        ~Rnd();
+
+        Rnd(const Rnd& other) = delete; // Delete copy constructor
+        Rnd& operator=(const Rnd& other) = delete; // Delete copy assignment operator
+        Rnd(Rnd&& other) = delete; // Delete move constructor
+        
+        double operator()() {
+            return _rnd_dist(_mt_gen);
+        }; 
+
+    private:
+        std::mt19937 _mt_gen; // Random number generator
+        std::uniform_real_distribution<double> _rnd_dist; // Uniform distribution between 0 and 1
+};
+
+extern Rnd global_rnd; 
 
 #endif 

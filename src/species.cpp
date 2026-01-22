@@ -18,11 +18,18 @@ explicit Species::Species(std::string name, double mass, double charge, World& w
     den(_world._ni, _world._nj, _world._nk)
 {}
 
-void Species::addParticle(const Eigen::Vector3d& pos, Eigen::Vector3d& vel, double mpwt) {
-    
-}
-
-void Species::loadParticlesBox(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, int num_sim_particles) {
+/**
+ * @brief Load particles uniformly in a box.
+ * @remarks Particles are loaded with zero velocity. This function modifies the internal storage of the Species object.
+ * 
+ * @param box_min Minimum corner of the box.
+ * @param box_max Maximum corner of the box.
+ * @param num_density Number density of particles to load (in real units).
+ * @param num_particles Number of simulation particles to load.
+ * 
+ * @returns void
+ */
+void Species::load_particles_box(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, int num_sim_particles) {
     
     // Calculate the box volume
     double box_volume = (box_max[0] - box_min[0]) * (box_max[1] - box_min[1]) * (box_max[2] - box_min[2]);
@@ -35,8 +42,18 @@ void Species::loadParticlesBox(Eigen::Vector3d& box_min, Eigen::Vector3d box_max
     // Initialize particles 
     for (int p = 0; p < num_sim_particles; p++) {
         // sample position
-    }
+        _x[p] = box_min[0] + global_rnd() * (box_max[0] - box_min[0]);
+        _y[p] = box_min[1] + global_rnd() * (box_max[1] - box_min[1]);
+        _z[p] = box_min[2] + global_rnd() * (box_max[2] - box_min[2]);
 
+        // sample velocity
+        _vx[p] = 0.0;
+        _vy[p] = 0.0;
+        _vz[p] = 0.0;
+
+        // set macroparticle weight
+        _mpwt[p] = mpw;
+    }
 }
 
 /**
