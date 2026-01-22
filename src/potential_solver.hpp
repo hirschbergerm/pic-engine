@@ -9,7 +9,7 @@ class PotentialSolver {
         explicit PotentialSolver(const unsigned int& max_solver_it, const double& tolerance);
         ~PotentialSolver();
 
-        auto solve(const Field& phi, const Field& rho, const Eigen::Vector3i& nn, const Eigen::Vector3d& dh) -> bool; // Solve Poisson's Equation
+        auto solve(Field& phi, Field& rho, const Eigen::Vector3i& nn, const Eigen::Vector3d& dh) -> bool; // Solve Poisson's Equation
 
         auto computeElectricField(const Field& phi) -> void; // Calculates static EF = -grad(phi)
 

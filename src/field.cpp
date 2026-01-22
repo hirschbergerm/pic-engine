@@ -14,25 +14,7 @@ Field::~Field() {
     
 }
 
-
-/*
-* @brief Overload the division operator for Field class
-* @param other:
-*/
-void Field::operator/=(const Field& other) {
-
-
-}
-
-Field Field::operator+=(const Field& other) {
-
-    Field result(_ni, _nj, _nk);
-    result._data = this->_data + other._data;
-    return result;
-
-}
-
-double Field::operator()(const int& i, const int& j, const int& k) const {
+double& Field::operator()(const int& i, const int& j, const int& k) {
     return _data(i, j, k);
 }
 
