@@ -1,5 +1,6 @@
-#include "field.hpp"
 #include <Eigen/Core>
+#include <vector>
+#include "field.hpp"
 
 #ifndef WORLD_HPP
 #define WORLD_HPP
@@ -18,10 +19,10 @@ class World {
         void setExtents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
 
-    private:
-
         const Eigen::Vector3i _nn; // Number of cells as an Eigen vector
-        const int _ni, _nj, _nk;
+        const int _ni, _nj, _nk; // Number of cells along each dimension
+
+    private:
 
         // The origin is always in the bottom corner of the simulation domain. It is NOT centered in a box.
         Eigen::Vector3d _x0; // Origin
@@ -33,6 +34,8 @@ class World {
         Field _phi; // Electric potential
         Field _rho; // Charge density
         Field3 _E; // Electric field
+
+        std::vector<class Species*> _species;
 
 };
 
