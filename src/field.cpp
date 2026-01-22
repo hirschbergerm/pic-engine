@@ -32,3 +32,7 @@ Field Field::operator+=(const Field& other) {
 
 }
 
+double Field::operator()(const int& i, const int& j, const int& k) const {
+    return _data(i, j, k);
+}
+

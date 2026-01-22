@@ -1,4 +1,5 @@
 #include "field.hpp"
+#include <Eigen/Core>
 
 #ifndef WORLD_HPP
 #define WORLD_HPP
@@ -14,20 +15,19 @@ class World {
         World& operator=(const World& other) = delete; // Delete copy assignment operator 
         World(World&& other) = delete;// Delete the move constructor
 
-
         void setExtents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
 
     private:
 
-        const int nn[3]; // Number of cells along each dimension [ni, nj, nk]
+        const Eigen::Vector3i _nn; // Number of cells as an Eigen vector
         const int _ni, _nj, _nk;
 
         // The origin is always in the bottom corner of the simulation domain. It is NOT centered in a box.
-        double x0[3]; // Origin
-        double dh[3]; // Cell size along each dimension [dx, dy, dz]
-        double xmax[3]; // Maximum coordinate along each dimension
-        double xc[3]; // Domain centroid
+        Eigen::Vector3d _x0; // Origin
+        Eigen::Vector3d _dh; // Cell size along each dimension [dx, dy, dz]
+        Eigen::Vector3d _xmax; // Maximum coordinate along each dimension
+        Eigen::Vector3d _xc; // Domain centroid
 
         // Fields
         Field _phi; // Electric potential

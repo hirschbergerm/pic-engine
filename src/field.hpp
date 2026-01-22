@@ -1,4 +1,3 @@
-#include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
 
 #ifndef FIELD_HPP
@@ -12,6 +11,7 @@ class Field {
         // Create math operators for field
         void operator /=(const Field& other);
         Field operator+=(const Field& other); // Add two fields 
+        double operator()(const int& i, const int& j, const int& k) const; // Access field value at (i,j,k))
 
     private:
         Eigen::Tensor<double, 3> _data; // 3D field data
