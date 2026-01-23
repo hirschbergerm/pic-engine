@@ -1,13 +1,17 @@
 #include "world.hpp"
 
-World::World(const int& ni, const int& nj, const int& nk) : 
+/**
+ * @brief Explicit constructor for the World class.
+ */
+explicit World::World(const int& ni, const int& nj, const int& nk) : 
     _ni(ni), 
     _nj(nj), 
     _nk(nk), 
     _nn{ni, nj, nk},
     _phi(ni, nj, nk),
     _rho(ni, nj, nk),
-    _E(ni, nj, nk) 
+    _E(ni, nj, nk),
+    _node_vol(ni, nj, nk)
     {}
 
 World::~World() {
@@ -36,6 +40,10 @@ const Eigen::Vector3d World::get_origin() {
     return _x0;
 }
 
+const Field& World::get_node_volumes() {
+    return _node_vol;
+}
+
 void World::setExtents(const double& x1, const double& y1, const double& z1, const double& x2, const double& y2, const double& z2) {
 
     // Set the origin coordinates
@@ -59,4 +67,24 @@ void World::setExtents(const double& x1, const double& y1, const double& z1, con
     _xc[1] = 0.5 * (_xmax[1] + _x0[1]);
     _xc[2] = 0.5 * (_xmax[2] + _x0[2]);
     
+}
+
+/**
+ * @brief Computes the volume associated with each grid node and stores it in the internal node volume field.
+ * 
+ * @return void
+ */
+void World::compute_node_volumes() {
+
+    for (int i = 0; i < _ni; i++) {
+        for (int j = 0; j < _nj; j++) {
+            for (int k = 0; k < _nk; k++) {
+                double vol = _dh[0] * _dh[1] * _dh[2];
+                if (i == 0 || i == _ni-1) vol *= 0.5;
+                if (j == 0 || j == _nj-1) vol *= 0.5;
+                if (k == 0 || k == _nk-1) vol *= 0.5;
+                _node_vol(i, j, k) = vol;
+            }
+        }
+    }
 }

@@ -15,12 +15,13 @@ class Species {
 
         // Public Methods
         void load_particles_box(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, int num_particles); 
+        void compute_number_density();
 
         const std::string name;
         const double charge; 
         const double mass;
 
-        Field den; // Number density field of the species
+        Field _den; // Number density field of the species
 
     private:
 

@@ -15,7 +15,7 @@ explicit Species::Species(std::string name, double mass, double charge, World& w
     _vy(0),
     _vz(0),
     _world(world),
-    den(_world._ni, _world._nj, _world._nk)
+    _den(_world._ni, _world._nj, _world._nk)
 {}
 
 /**
@@ -69,4 +69,30 @@ void Species::resize_storage(const int& new_size) {
     _vz.conservativeResize(new_size);
 
     _mpwt.conservativeResize(new_size);
+}
+
+/**
+ * @brief Computes the number density field of the species based on the current particle positions and macroparticle weights. Modifies the internal 
+ * density Field member of the Species object.
+ * 
+ * @return void
+ */
+void Species::compute_number_density() { 
+
+    _den = 0.0; // 
+
+    // Loop over all sim particles
+    const int num_sim_particles = _x.size();
+
+    for (int p = 0; p < num_sim_particles; p++) {
+        // Convert to logical coordinates
+        Eigen::Vector3d l = _world.XtoL({_x[p], _y[p], _z[p]});
+
+        // Scatter the density value to the grid
+        _den.scatter(l, _mpwt[p]);
+        
+    }
+
+    _den /= _world.get_node_volumes(); // Divide by the node volumes to get number density
+
 }
