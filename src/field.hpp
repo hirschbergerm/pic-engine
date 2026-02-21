@@ -8,18 +8,26 @@ class Field {
         Field(const int& ni, const int& nj, const int& nk);
         ~Field();
 
-        // Create math operators for field
-        //void operator /=(const Field& other);
-        // Field operator+=(const Field& other); // Add two fields 
+        // Operator overloads
+        void operator=(const double& value); // Set all field values to the assigned value
+        void operator*(const double& value); // Multiply all field values by the passed value
+        void operator/=(const double& value); // Divide all field values by the passed value
+        void operator/=(const Field& other);; // Elementwise division by another Field
+        void operator+=(const Field& other); // Elementwise addition with another Field
         double& operator()(const int& i, const int& j, const int& k); // Read-Write Field access operator for value at (i,j,k)
+
+        void scatter(const Eigen::Vector3d& l, const double& value); // Scatter a field value at the logical coordinate l
+        void gather(const Eigen::Vector3d& l, double& value); // Gather a field value at the logical coordinate l
+
+        bool in_bound_logical(const Eigen::Vector3d& l) const; // Check if the logical coordinate l is within bounds of the field
 
     private:
         Eigen::Tensor<double, 3> _data; // 3D field data
 
     protected:
-        const int _ni, _nj, _nk;
-};
+        const int _ni, _nj, _nk; // Number of nodes in each direction
 
+};
 
 class Field3 : Field {
     public: 
