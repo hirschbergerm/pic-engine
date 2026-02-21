@@ -1,6 +1,5 @@
 #include <Eigen/Core>
 #include <vector>
-#include "field.hpp"
 
 #ifndef WORLD_HPP
 #define WORLD_HPP
@@ -16,15 +15,18 @@ class World {
         World& operator=(const World& other) = delete; // Delete copy assignment operator 
         World(World&& other) = delete;// Delete move constructor
 
+        // Getters
         const Eigen::Vector3d XtoL(const Eigen::Vector3d& x);
         const Eigen::Vector3d get_dh();
         const Eigen::Vector3d get_origin();
         const Field& get_node_volumes();
 
-        void setExtents(const double& x1, const double& y1, const double& z1,
+        // 
+        void set_extents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
 
         void compute_node_volumes();
+        void compute_charge_density();
 
         const Eigen::Vector3i _nn; // Number of cells as an Eigen vector
         const int _ni, _nj, _nk; // Number of cells along each dimension
@@ -36,12 +38,12 @@ class World {
         Eigen::Vector3d _dh; // Cell size along each dimension [dx, dy, dz]
         Eigen::Vector3d _xmax; // Maximum coordinate along each dimension
         Eigen::Vector3d _xc; // Domain centroid
-        Field _node_vol; // Volume associated with each grid node
+        class Field _node_vol; // Volume associated with each grid node
 
         // Fields
-        Field _phi; // Electric potential
-        Field _rho; // Charge density
-        Field3 _E; // Electric field
+        class Field _phi; // Electric potential
+        class Field _rho; // Charge density
+        class Field3 _E; // Electric field
 
         std::vector<class Species*> _species;
 

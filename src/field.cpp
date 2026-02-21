@@ -55,9 +55,23 @@ void Field::operator+=(const Field& other) {
     _data = _data + other._data;
 }
 
+void Field::operator*(const double& value) {
+
+    _data = _data * value; // Multiply all field values by the passed value
+}
+
 double& Field::operator()(const int& i, const int& j, const int& k) {
 
     return _data(i, j, k);
+
+}
+
+/**
+ * @brief Checks if the logical coordinate l is within bounds of the field.
+ */
+bool Field::in_bound_logical(const Eigen::Vector3d& l) const {
+
+    return (l(0) >= 0 && l(0) <= _ni-1 && l(1) >= 0 && l(1) <= _nj-1 && l(2) >= 0 && l(2) <= _nk-1);
 
 }
 
@@ -77,6 +91,9 @@ void Field::scatter(const Eigen::Vector3d& l, const double& value) {
         return; 
     }
     
+    // Logical coordinate is an index with a fractional part
+    // 1.75 -> i=1, di=0.75
+
     // Get the node indices
     int i = static_cast<int>(std::floor(l(0)));
     int j = static_cast<int>(std::floor(l(1)));
@@ -99,4 +116,45 @@ void Field::scatter(const Eigen::Vector3d& l, const double& value) {
     _data(i,j+1,k+1) += value * (1-di) * (dj) * (dk);
     _data(i+1,j+1,k+1) += value * (di) * (dj) * (dk);
 
+}
+
+/*
+ * @brief Gathers a field value at logical coordinate (l) from the adjacent cell nodes. Modifies the passed value.
+ * 
+ * @param l The logical coordinate to gather from (3D vector).
+ * @param value The field value to gather into.
+ * @return void
+ */
+void Field::gather(const Eigen::Vector3d& l, double& value) {
+
+    // Check that the logical coordinates are within bounds
+    if (!in_bound_logical(l)) {
+        return;
+    }
+
+    // Logical coordinate is an index with a fractional part
+    // 1.75 -> i=1, di=0.75
+
+    // Get the node indices
+    int i = static_cast<int>(std::floor(l(0)));
+    int j = static_cast<int>(std::floor(l(1)));
+    int k = static_cast<int>(std::floor(l(2)));
+
+    // Get the fractional distances
+    double di = l(0) - i;
+    double dj = l(1) - j;
+    double dk = l(2) - k;
+
+    // Interpolate data from surrounding nodes
+    // We add the contributions from each of the surrounding nodes weighted by their distance to the logical coordinate
+    value = (1-di)*(1-dj)*(1-dk)*_data(i,j,k) +
+            (di)*(1-dj)*(1-dk)*_data(i+1,j,k) +
+            (1-di)*(dj)*(1-dk)*_data(i,j+1,k) + 
+            (di)*(dj)*(1-dk)*_data(i+1,j+1,k) +
+            (1-di)*(1-dj)*(dk)*_data(i,j,k+1) +
+            (di)*(1-dj)*(dk)*_data(i+1,j,k+1) +
+            (1-di)*(dj)*(dk)*_data(i,j+1,k+1) +
+            (di)*(dj)*(dk)*_data(i+1,j+1,k+1);
+
+    return; 
 }

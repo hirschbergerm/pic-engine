@@ -10,6 +10,7 @@ class Field {
 
         // Operator overloads
         void operator=(const double& value); // Set all field values to the assigned value
+        void operator*(const double& value); // Multiply all field values by the passed value
         void operator/=(const double& value); // Divide all field values by the passed value
         void operator/=(const Field& other);; // Elementwise division by another Field
         void operator+=(const Field& other); // Elementwise addition with another Field
@@ -18,6 +19,8 @@ class Field {
         void scatter(const Eigen::Vector3d& l, const double& value); // Scatter a field value at the logical coordinate l
         void gather(const Eigen::Vector3d& l, double& value); // Gather a field value at the logical coordinate l
 
+        bool in_bound_logical(const Eigen::Vector3d& l) const; // Check if the logical coordinate l is within bounds of the field
+
     private:
         Eigen::Tensor<double, 3> _data; // 3D field data
 
@@ -25,7 +28,6 @@ class Field {
         const int _ni, _nj, _nk; // Number of nodes in each direction
 
 };
-
 
 class Field3 : Field {
     public: 

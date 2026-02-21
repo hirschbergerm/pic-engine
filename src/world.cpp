@@ -1,4 +1,6 @@
 #include "world.hpp"
+#include "species.hpp"
+#include "field.hpp"
 
 /**
  * @brief Explicit constructor for the World class.
@@ -44,7 +46,7 @@ const Field& World::get_node_volumes() {
     return _node_vol;
 }
 
-void World::setExtents(const double& x1, const double& y1, const double& z1, const double& x2, const double& y2, const double& z2) {
+void World::set_extents(const double& x1, const double& y1, const double& z1, const double& x2, const double& y2, const double& z2) {
 
     // Set the origin coordinates
     _x0[0] = x1;
@@ -87,4 +89,16 @@ void World::compute_node_volumes() {
             }
         }
     }
+}
+
+void World::compute_charge_density() {
+
+    _rho = 0.0; // Initialize the charge density field to zero
+
+    for (const auto& species : _species) {
+        if (species->_charge == 0.0) continue; // Skip neutral species
+        _rho += species->_den * species->_charge; // Accumulate charge density from each species
+
+    }
+
 }
