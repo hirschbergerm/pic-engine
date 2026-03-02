@@ -157,3 +157,31 @@ void Species::compute_number_density() {
     _den /= _world.get_node_volumes(); // Divide by the node volumes to get number density
 
 }
+
+void Species::push_particles() {
+    // Get time step from simulation domain
+    double dt = _world._dt;
+
+    // Get mesh bounds
+    Eigen::Vector3d x_origin = _world.get_origin();
+    Eigen::Vector3d x_max = _world._xmax;
+
+    for (int p = 0; p < _x.size(); p++) {
+
+        // Get logical coordinate 
+        Eigen::Vector3d l = _world.XtoL({_x[p], _y[p], _z[p]});
+
+        // Get electric field at logical coordinate
+        Eigen::Vector3d e = _world._E.gather(l);
+
+        // Update velocity using F = qE
+        _vx[p] += e[0] * (_charge / _mass);
+        _vy[p] += e[1] * (_charge / _mass);
+        _vz[p] += e[2] * (_charge / _mass);
+
+        // Update position using v = dx/dt
+        _x[p] += _vx[p]*dt;
+
+    }
+
+}

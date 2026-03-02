@@ -22,12 +22,14 @@ class World {
         const Eigen::Vector3d get_origin();
         const Field<double>& get_node_volumes();
 
-        // 
+        // Setters
         void set_extents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
 
         void compute_node_volumes();
         void compute_charge_density();
+
+        void particle_push();
 
         const Eigen::Vector3i _nn; // Number of cells as an Eigen vector
         const int _ni, _nj, _nk; // Number of cells along each dimension
