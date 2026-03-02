@@ -16,6 +16,8 @@ class Species {
         void load_particles_box_quiet_start(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, Eigen::Vector3i& num_sim_particles);
         void compute_number_density();
 
+        void push_particles();
+
         const std::string _name;
         const double _charge; 
         const double _mass;

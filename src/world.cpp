@@ -102,3 +102,13 @@ void World::compute_charge_density() {
     }
 
 }
+
+void World::particle_push() {
+
+    for (auto& species: _species) {
+
+        species.push_particles();
+
+    }
+
+}
