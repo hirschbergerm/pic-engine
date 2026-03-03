@@ -42,7 +42,7 @@ const Eigen::Vector3d World::get_origin() {
     return _x0;
 }
 
-const Field& World::get_node_volumes() {
+const Field<double>& World::get_node_volumes() {
     return _node_vol;
 }
 
@@ -97,7 +97,7 @@ void World::compute_charge_density() {
 
     for (const auto& species : _species) {
         if (species->_charge == 0.0) continue; // Skip neutral species
-        _rho += species->_den * species->_charge; // Accumulate charge density from each species
+        _rho += species->_charge * species->_den; // Accumulate charge density from each species
 
     }
 
