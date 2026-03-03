@@ -23,7 +23,7 @@ class Field {
         T& operator()(const int& i, const int& j, const int& k); // Read-Write Field access operator for value at (i,j,k)
 
         void scatter(const Eigen::Vector3d& l, const T& value); // Scatter a field value at the logical coordinate l
-        T gather(const Eigen::Vector3d& l, T& value); // Gather a field value at the logical coordinate l
+        T& gather(const Eigen::Vector3d& l, T& value); // Gather a field value at the logical coordinate l
 
         bool in_bound_logical(const Eigen::Vector3d& l) const; // Check if the logical coordinate l is within bounds of the field
 
@@ -35,20 +35,26 @@ class Field {
 
 };
 
-template <typename T>
-class Field3 : Field<T> {
+
+class Field3 {
     public: 
-        Field3<T>(const int& ni, const int& nj, const int& nk);
-        ~Field3<T>();
+        Field3(const int& ni, const int& nj, const int& nk);
+        ~Field3() = default;
+
+        bool in_bound_logical(const Eigen::Vector3d& l) const;
 
         void scatter(const Eigen::Vector3d& l, const Eigen::Vector3d& value);
         void gather(const Eigen::Vector3d& l, Eigen::Vector3d& value);
 
+        Eigen::Vector3d& operator()(const int& i, const int& j, const int& k); // Read-Write Field access operator for value at (i,j,k)
+
     private:
-        Eigen::Tensor<T, 3> _dataX;
-        Eigen::Tensor<T, 3> _dataY;
-        Eigen::Tensor<T, 3> _dataZ;
+        Eigen::Tensor<double, 3> _dataX;
+        Eigen::Tensor<double, 3> _dataY;
+        Eigen::Tensor<double, 3> _dataZ;
         
+    protected:
+        const int _ni, _nj, _nk; // Number of nodes in each direction
 }; 
 
 #endif // FIELD_HPP

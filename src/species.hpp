@@ -20,7 +20,7 @@ class Species {
         const double _charge; 
         const double _mass;
 
-        Field _den; // Number density field of the species
+        Field<double> _den; // Number density field of the species
 
     private:
 
