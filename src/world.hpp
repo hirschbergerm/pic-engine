@@ -19,7 +19,7 @@ class World {
         const Eigen::Vector3d XtoL(const Eigen::Vector3d& x);
         const Eigen::Vector3d get_dh();
         const Eigen::Vector3d get_origin();
-        const Field& get_node_volumes();
+        const Field<double>& get_node_volumes();
 
         // 
         void set_extents(const double& x1, const double& y1, const double& z1,
@@ -38,12 +38,12 @@ class World {
         Eigen::Vector3d _dh; // Cell size along each dimension [dx, dy, dz]
         Eigen::Vector3d _xmax; // Maximum coordinate along each dimension
         Eigen::Vector3d _xc; // Domain centroid
-        class Field _node_vol; // Volume associated with each grid node
+        class Field<double> _node_vol; // Volume associated with each grid node
 
         // Fields
-        class Field _phi; // Electric potential
-        class Field _rho; // Charge density
-        class Field3 _E; // Electric field
+        class Field<double> _phi; // Electric potential
+        class Field<double> _rho; // Charge density
+        class Field3<double> _E; // Electric field
 
         std::vector<class Species*> _species;
 
