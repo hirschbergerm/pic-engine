@@ -182,7 +182,7 @@ void Field<T>::scatter(const Eigen::Vector3d& l, const T& value) {
  * @return void
  */
 template <typename T>
-T Field<T>::gather(const Eigen::Vector3d& l, T& value) {
+T& Field<T>::gather(const Eigen::Vector3d& l, T& value) {
 
     // Check that the logical coordinates are within bounds
     if (!in_bound_logical(l)) {
@@ -216,7 +216,32 @@ T Field<T>::gather(const Eigen::Vector3d& l, T& value) {
     return value;
 }
 
-void Field3<double>::scatter(const Eigen::Vector3d& l, const Eigen::Vector3d& value) {
+// Field method explicit instantiations
+template double& Field<double>::gather(const Eigen::Vector3d& l, double& value);
+template void Field<double>::scatter(const Eigen::Vector3d& l, const double& value);
+
+// Field 3 methods
+
+Field3::Field3(const int& ni, const int& nj, const int& nk) : 
+    _ni(ni),
+    _nj(nj),
+    _nk(nk),
+    _dataX(ni, nj, nk), 
+    _dataY(ni, nj, nk), 
+    _dataZ(ni, nj, nk) {
+
+    _dataX.setZero();
+    _dataY.setZero();
+    _dataZ.setZero();
+
+}
+
+bool Field3::in_bound_logical(const Eigen::Vector3d& l) const {
+    
+    return (l(0) >= 0 && l(0) <= _ni-1 && l(1) >= 0 && l(1) <= _nj-1 && l(2) >= 0 && l(2) <= _nk-1);
+}
+
+void Field3::scatter(const Eigen::Vector3d& l, const Eigen::Vector3d& value) {
     // Check that the logical coordinates are within bounds
     if (!in_bound_logical(l)) {
         return; 
@@ -267,7 +292,7 @@ void Field3<double>::scatter(const Eigen::Vector3d& l, const Eigen::Vector3d& va
 }
 
 
-void Field3<double>::gather(const Eigen::Vector3d& l, Eigen::Vector3d& value) {
+void Field3::gather(const Eigen::Vector3d& l, Eigen::Vector3d& value) {
 
     // Check that the logical coordinates are within bounds
     if (!in_bound_logical(l)) {
@@ -318,3 +343,12 @@ void Field3<double>::gather(const Eigen::Vector3d& l, Eigen::Vector3d& value) {
     return; 
 }
 
+Eigen::Vector3d& Field3::operator()(const int& i, const int& j, const int& k) {
+
+    static Eigen::Vector3d value; // Static variable to hold the value to return a reference to
+
+    value[0] = _dataX(i,j,k);
+    value[1] = _dataY(i,j,k);
+    value[2] = _dataZ(i,j,k);
+
+    return value;

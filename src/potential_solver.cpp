@@ -2,7 +2,8 @@
 #include "constants.hpp"
 #include <iostream>
 
-PotentialSolver::PotentialSolver(const unsigned int& max_solver_it, const double& tolerance) :
+PotentialSolver::PotentialSolver(World& world, const unsigned int& max_solver_it, const double& tolerance) :
+ _world(world),
  _max_solver_it(max_solver_it),
  _tolerance(tolerance) 
  {} 
@@ -14,7 +15,12 @@ PotentialSolver::~PotentialSolver() {}
  * 
  * @param phi The electric potential field to be solved (modified in place).
  */
-auto PotentialSolver::solve(Field& phi, Field& rho, const Eigen::Vector3i& nn, const Eigen::Vector3d& dh) -> bool {
+auto PotentialSolver::solve() -> bool {
+
+    Field<double>& phi = _world._phi;
+    Field<double>& rho = _world._rho;
+    const Eigen::Vector3i& nn = _world._nn;
+    const Eigen::Vector3d& dh = _world.get_dh();
     
     // precompute (1/dx^2)
     double idx2 = 1.0/(dh[0]*dh[0]);
@@ -38,10 +44,6 @@ auto PotentialSolver::solve(Field& phi, Field& rho, const Eigen::Vector3i& nn, c
 
                     // SOR step
                     phi(i,j,k) = phi(i,j,k) + 1.5 * (phi_new - phi(i,j,k));
-
-                
-
-
 
                 }
             }
@@ -77,4 +79,53 @@ auto PotentialSolver::solve(Field& phi, Field& rho, const Eigen::Vector3i& nn, c
     }
 
     return converged;
+}
+
+/** * @brief Computes the electric field from the electric potential using central differences.
+ * 
+ * @param phi The electric potential field (input).
+ * @param E The electric field to be computed (modified in place).
+*/
+auto PotentialSolver::computeElectricField() -> void {
+ 
+    Field<double>& phi = _world._phi;
+    Field3& E = _world._E;
+
+    const Eigen::Vector3d& dh = _world.get_dh();
+
+    for (int i=0; i<_world._nn[0]; i++) {
+        for (int j=0; j<_world._nn[1]; j++) {
+            for (int k=0; k<_world._nn[2]; k++) {
+                // Compute the electric field components using central differences
+                double Ex = 0.0, Ey = 0.0, Ez = 0.0;
+
+                // x component
+                if (i==0) {
+                    Ex = -(-3*phi(i,j,k) + 4*phi(i+1,j,k) - phi(i+2,j,k)) / (2.0 * dh[0]); // forward difference
+                } else if (i==_world._nn[0]-1) {
+                    Ex = -(phi(i-2,j,k) - 4*phi(i-1,j,k) + 3*phi(i,j,k)) / (2.0 * dh[0]); // backward difference
+                } else {
+                    Ex = -(phi(i+1,j,k) - phi(i-1,j,k)) / (2.0 * dh[0]); // central difference
+                }
+
+                if (j==0) {
+                    Ey = -(-3*phi(i,j,k) + 4*phi(i,j+1,k) - phi(i,j+2,k)) / (2.0 * dh[1]); // forward difference
+                } else if (j==_world._nn[1]-1) {
+                    Ey = -(phi(i,j-2,k) - 4*phi(i,j-1,k) + 3*phi(i,j,k)) / (2.0 * dh[1]); // backward difference
+                } else {
+                    Ey = -(phi(i,j+1,k) - phi(i,j-1,k)) / (2.0 * dh[1]); // central difference
+                }
+
+                if (k==0) {
+                    Ez = -(-3*phi(i,j,k) + 4*phi(i,j,k+1) - phi(i,j,k+2)) / (2.0 * dh[2]); // forward difference
+                } else if (k==_world._nn[2]-1) {
+                    Ez = -(phi(i,j,k-2) - 4*phi(i,j,k-1) + 3*phi(i,j,k)) / (2.0 * dh[2]); // backward difference
+                } else {
+                    Ez = -(phi(i,j,k+1) - phi(i,j,k-1)) / (2.0 * dh[2]); // central difference
+                }
+
+                E(i,j,k) = Eigen::Vector3d(Ex, Ey, Ez);
+            }
+        }
+    }   
 }
