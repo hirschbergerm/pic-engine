@@ -20,7 +20,7 @@ class World {
         const Eigen::Vector3d XtoL(const Eigen::Vector3d& x);
         const Eigen::Vector3d get_dh();
         const Eigen::Vector3d get_origin();
-        const Field<double>& get_node_volumes();
+        const Field<double><double>& get_node_volumes();
 
         // Setters
         void set_extents(const double& x1, const double& y1, const double& z1,
