@@ -10,7 +10,7 @@ class World {
     public: 
         
         explicit World(const int& ni, const int& nj, const int& nk); // Explicit constructor
-        ~World(); // Destructor
+        ~World() = default; // Destructor
 
         World(const World& other) = delete; // Delete copy consturctor
         World& operator=(const World& other) = delete; // Delete copy assignment operator 
@@ -26,6 +26,8 @@ class World {
         void set_extents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
 
+        void set_time(double dt, int num_ts);
+
         void compute_node_volumes();
         void compute_charge_density();
 
@@ -39,7 +41,7 @@ class World {
         class Field<double> _rho; // Charge density
         class Field3 _E; // Electric field
 
-    private:
+    protected:
 
         // The origin is always in the bottom corner of the simulation domain. It is NOT centered in a box.
         Eigen::Vector3d _x0; // Origin
@@ -49,6 +51,9 @@ class World {
         class Field<double> _node_vol; // Volume associated with each grid node
 
         std::vector<class Species*> _species;
+
+        double _dt;
+        int _num_timesteps;
 
 };
 

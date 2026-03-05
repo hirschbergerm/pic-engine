@@ -172,15 +172,18 @@ void Species::push_particles() {
         Eigen::Vector3d l = _world.XtoL({_x[p], _y[p], _z[p]});
 
         // Get electric field at logical coordinate
-        Eigen::Vector3d e = _world._E.gather(l);
+        Eigen::Vector3d ef;
+        _world._E.gather(l, ef);
 
         // Update velocity using F = qE
-        _vx[p] += e[0] * (_charge / _mass);
-        _vy[p] += e[1] * (_charge / _mass);
-        _vz[p] += e[2] * (_charge / _mass);
+        _vx[p] += ef[0] * dt * (_charge / _mass);
+        _vy[p] += ef[1] * dt *(_charge / _mass);
+        _vz[p] += ef[2] * dt * (_charge / _mass);
 
         // Update position using v = dx/dt
         _x[p] += _vx[p]*dt;
+        _y[p] += _vy[p]*dt;
+        _z[p] += _vz[p]*dt;
 
     }
 

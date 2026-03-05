@@ -16,10 +16,6 @@ explicit World::World(const int& ni, const int& nj, const int& nk) :
     _node_vol(ni, nj, nk)
     {}
 
-World::~World() {
-
-}
-
 /**
  * @brief Converts from physical coordinates to logical (cell-centered) coordinates.
  * 
@@ -109,7 +105,7 @@ void World::particle_push() {
 
     for (auto& species: _species) {
 
-        species.push_particles();
+        species->push_particles();
 
     }
 
