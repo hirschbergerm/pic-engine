@@ -11,7 +11,6 @@ class PotentialSolver {
         ~PotentialSolver();
 
         auto solve() -> bool; // Solve Poisson's Equation
-
         auto computeElectricField() -> void; // Calculates static EF = -grad(phi)
 
     private:
