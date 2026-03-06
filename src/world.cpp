@@ -110,3 +110,13 @@ void World::particle_push() {
     }
 
 }
+
+void World::particle_push() {
+
+    for (auto& species: _species) {
+
+        species.push_particles();
+
+    }
+
+}
