@@ -97,7 +97,9 @@ void World::compute_charge_density() {
 
     for (const auto& species : _species) {
         if (species->_charge == 0.0) continue; // Skip neutral species
-        _rho += species->_charge * species->_den; // Accumulate charge density from each species
+
+        species->_den *= species->_charge; // Scale density by charge to get charge density contribution from this species
+        _rho += species->_den; // Add this species' contribution to the total charge density
 
     }
 

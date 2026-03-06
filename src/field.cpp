@@ -1,11 +1,11 @@
 #include "field.hpp"
-#include <Eigen/Core>
+#include <algorithm>
 
 template <typename T>
-Field<T>::Field(const int& ni, const int& nj, const int& nk) : _ni(ni), _nj(nj), _nk(nk) {
+Field<T>::Field(size_t ni, size_t nj, size_t nk) : _ni(ni), _nj(nj), _nk(nk) {
 
-    _data = Eigen::Tensor<T, 3>(ni, nj, nk); // Initialize the data tensor to the correct size
-    _data.setZero(); // Set all of the data to 0
+    _data.resize(ni * nj * nk); // Resize the data vector to hold all field values
+    _data.assign(0.0); // Initialize all field values to 0.0
 
 }
 
@@ -15,7 +15,7 @@ Field<T>::Field(const int& ni, const int& nj, const int& nk) : _ni(ni), _nj(nj),
 * @param other The other field to move from.
 */
 template <typename T>
-Field<T>::Field(Field<T>&& other) : 
+Field<T>::Field(Field<T>&& other) noexcept : 
     _ni{other._ni},
     _nj{other._nj},
     _nk{other._nk} {
@@ -47,8 +47,24 @@ Field<T>& Field<T>::operator=(Field<T>&& other) noexcept {
 template <typename T>
 void Field<T>::operator=(const T& value) {
 
-    _data.setConstant(value); // Set all of the Eigen tensor values to value
+    _data.assign(_data.size(), value); // Set all of the Eigen tensor values to value
 
+}
+
+/**
+ * @brief Multiplication chain operator. Allows for elementwise multiplication of this field with a scalar value.
+ * 
+ * @param value The scalar value to multiply all field elements by.
+ * @return *this A reference to this field after the multiplication.
+ */
+template <typename T>
+Field<T>& Field<T>::operator*=(const T& value) {
+
+    std::transform(_data.begin(), _data.end(), _data.begin(), [&value](T& element) {
+        return element * value; // Multiply each element by the passed value
+    });
+
+    return *this;
 }
 
 /**
@@ -60,21 +76,13 @@ void Field<T>::operator=(const T& value) {
 template <typename T>
 Field<T>& Field<T>::operator/=(const T& value) {
 
-    _data = _data / value; // Divide all field values by the passed value
-    return *this;
+    assert(value != 0); // Make sure we are not dividing by zero
 
-}
+    // Modify in place using lambda function
+    std::transform(_data.begin(), _data.end(), _data.begin(), [&value](T& element) {
+        return element / value; // Divide each element by the passed value
+    })
 
-/**
- * @brief Elementwise division of this field by another field.
- * 
- * @param other The other field to divide by.
- * @return void
- */
-template <typename T>
-Field<T>& Field<T>::operator/=(const Field<T>& other) {
-
-    _data = _data / other._data;
     return *this;
 
 }
@@ -88,34 +96,37 @@ Field<T>& Field<T>::operator/=(const Field<T>& other) {
 template <typename T>
 Field<T>& Field<T>::operator+=(const Field<T>& other) {
 
-    _data = _data + other._data;
-    return *this;
-}
-
-/**<
- * @brief Multiplication chain operator. Allows for elementwise multiplication of this field with a scalar value.
- * 
- * @param value The scalar value to multiply all field elements by.
- * @return *this A reference to this field after the multiplication.
- */
-template <typename T>
-Field<T>& Field<T>::operator*=(const T& value) {
-
-    _data = value * _data; // Multiply all field values by the passed value
+    std::transform(_data.begin(), _data.end(), other._data.begin(), _data.begin(), std::plus<T>());
     return *this;
 }
 
 /**
- * @brief Data access operator overload. Allows for read-write access to field values at the specified indices.
+ * @brief Subtraction chain operator. Allows for elementwise subtraction of this field with another field.
  * 
- * @param i Tensor index in the x direction.
- * @param j Tensor index in the y direction.
- * @param k Tensor index in the z direction.
+ * @param other The other field to subtract from this field.
+ * @return *this A reference to this field after the subtraction.
  */
 template <typename T>
-T& Field<T>::operator()(const int& i, const int& j, const int& k) {
+Field<T>& Field<T>::operator-=(const Field<T>& other) {
 
-    return _data(i, j, k);
+    std::transform(_data.begin(), _data.end(), other._data.begin(), _data.begin(), std::minus<T>());
+    return *this;
+}
+
+/**
+ * @brief Elementwise division of this field by another field.
+ * 
+ * @param other The other field to divide by.
+ * @return void
+ */
+template <typename T>
+Field<T>& Field<T>::operator/=(const Field<T>& other) {
+
+    // Make sure that the dimensions of the two fields match up, otherwise something has gone really wrong
+    assert(_data.size() == other._data.size());
+
+    std::transform(_data.begin(), _data.end(), other._data.begin(), _data.begin(), std::divides<T>());
+    return *this;
 
 }
 
@@ -146,6 +157,7 @@ void Field<T>::scatter(const Eigen::Vector3d& l, const T& value) {
 
     // Check that the logical coordinates are within bounds
     if (l(0) < 0 || l(0) > _ni-1 || l(1) < 0 || l(1) > _nj-1 || l(2) < 0 || l(2) > _nk-1) {
+        // TODO: Throw exception here and handle it.
         return; 
     }
     
@@ -163,14 +175,14 @@ void Field<T>::scatter(const Eigen::Vector3d& l, const T& value) {
     double dk = l(2) - k;
 
     // Scatter data to the surrounding nodes
-    _data(i,j,k) += value * (1-di) * (1-dj) * (1-dk);
-    _data(i+1,j,k) += value * (di) * (1-dj) * (1-dk);
-    _data(i,j+1,k) += value * (1-di) * (dj) * (1-dk); 
-    _data(i+1,j+1,k) += value * (di) * (dj) * (1-dk);
-    _data(i,j,k+1) += value * (1-di) * (1-dj) * (dk);
-    _data(i+1,j,k+1) += value * (di) * (1-dj) * (dk);
-    _data(i,j+1,k+1) += value * (1-di) * (dj) * (dk);
-    _data(i+1,j+1,k+1) += value * (di) * (dj) * (dk);
+    _data(index(i,j,k)) += value * (1-di) * (1-dj) * (1-dk);
+    _data(index(i+1,j,k)) += value * (di) * (1-dj) * (1-dk);
+    _data(index(i,j+1,k)) += value * (1-di) * (dj) * (1-dk); 
+    _data(index(i+1,j+1,k)) += value * (di) * (dj) * (1-dk);
+    _data(index(i,j,k+1)) += value * (1-di) * (1-dj) * (dk);
+    _data(index(i+1,j,k+1)) += value * (di) * (1-dj) * (dk);
+    _data(index(i,j+1,k+1)) += value * (1-di) * (dj) * (dk);
+    _data(index(i+1,j+1,k+1)) += value * (di) * (dj) * (dk);
 
 }
 
@@ -182,7 +194,7 @@ void Field<T>::scatter(const Eigen::Vector3d& l, const T& value) {
  * @return void
  */
 template <typename T>
-T& Field<T>::gather(const Eigen::Vector3d& l, T& value) {
+void Field<T>::gather(const Eigen::Vector3d& l, T& value) {
 
     // Check that the logical coordinates are within bounds
     if (!in_bound_logical(l)) {
@@ -204,35 +216,37 @@ T& Field<T>::gather(const Eigen::Vector3d& l, T& value) {
 
     // Interpolate data from surrounding nodes
     // We add the contributions from each of the surrounding nodes weighted by their distance to the logical coordinate
-    value = (1-di)*(1-dj)*(1-dk)*_data(i,j,k) +
-            (di)*(1-dj)*(1-dk)*_data(i+1,j,k) +
-            (1-di)*(dj)*(1-dk)*_data(i,j+1,k) + 
-            (di)*(dj)*(1-dk)*_data(i+1,j+1,k) +
-            (1-di)*(1-dj)*(dk)*_data(i,j,k+1) +
-            (di)*(1-dj)*(dk)*_data(i+1,j,k+1) +
-            (1-di)*(dj)*(dk)*_data(i,j+1,k+1) +
-            (di)*(dj)*(dk)*_data(i+1,j+1,k+1);
+    value = (1-di) * (1-dj) * (1-dk) * _data(index(i,j,k)) +
+            (di) * (1-dj) * (1-dk) * _data(index(i+1,j,k)) +
+            (1-di) * (dj) * (1-dk) * _data(index(i,j+1,k)) + 
+            (di) * (dj) * (1-dk) * _data(index(i+1,j+1,k)) +
+            (1-di) * (1-dj) * (dk) * _data(index(i,j,k+1)) +
+            (di) * (1-dj) * (dk) * _data(index(i+1,j,k+1)) +
+            (1-di) * (dj) * (dk) * _data(index(i,j+1,k+1)) +
+            (di) * (dj) * (dk) * _data(index(i+1,j+1,k+1));
 
     return value;
 }
 
 // Field method explicit instantiations
-template double& Field<double>::gather(const Eigen::Vector3d& l, double& value);
+template void Field<double>::gather(const Eigen::Vector3d& l, double& value);
 template void Field<double>::scatter(const Eigen::Vector3d& l, const double& value);
 
 // Field 3 methods
-
-Field3::Field3(const int& ni, const int& nj, const int& nk) : 
+Field3::Field3(size_t ni, size_t nj, size_t nk) : 
     _ni(ni),
     _nj(nj),
-    _nk(nk),
-    _dataX(ni, nj, nk), 
-    _dataY(ni, nj, nk), 
-    _dataZ(ni, nj, nk) {
+    _nk(nk) {
 
-    _dataX.setZero();
-    _dataY.setZero();
-    _dataZ.setZero();
+    // Resize the data vector to hold all field values
+    _dataX.resize(ni * nj * nk); 
+    _dataY.resize(ni * nj * nk);
+    _dataZ.resize(ni * nj * nk);
+
+    // Initialize all field values to 0.0
+    _dataX.assign(_dataX.size(),0.0); 
+    _dataY.assign(_dataY.size(), 0.0);
+    _dataZ.assign(_dataZ.size(), 0.0);
 
 }
 
@@ -261,32 +275,32 @@ void Field3::scatter(const Eigen::Vector3d& l, const Eigen::Vector3d& value) {
     double dk = l(2) - k;
 
     // Scatter data to the surrounding nodes for each component of the field
-    _dataX(i,j,k) += value[0] * (1-di) * (1-dj) * (1-dk);
-    _dataX(i+1,j,k) += value[0] * (di) * (1-dj) * (1-dk);
-    _dataX(i,j+1,k) += value[0] * (1-di) * (dj) * (1-dk); 
-    _dataX(i+1,j+1,k) += value[0] * (di) * (dj) * (1-dk);
-    _dataX(i,j,k+1) += value[0] * (1-di) * (1-dj) * (dk);
-    _dataX(i+1,j,k+1) += value[0] * (di) * (1-dj) * (dk);
-    _dataX(i,j+1,k+1) += value[0] * (1-di) * (dj) * (dk);
-    _dataX(i+1,j+1,k+1) += value[0] * (di) * (dj) * (dk);
+    x(i,j,k) += value[0] * (1-di) * (1-dj) * (1-dk);
+    x(i+1,j,k) += value[0] * (di) * (1-dj) * (1-dk);
+    x(i,j+1,k) += value[0] * (1-di) * (dj) * (1-dk); 
+    x(i+1,j+1,k) += value[0] * (di) * (dj) * (1-dk);
+    x(i,j,k+1) += value[0] * (1-di) * (1-dj) * (dk);
+    x(i+1,j,k+1) += value[0] * (di) * (1-dj) * (dk);
+    x(i,j+1,k+1) += value[0] * (1-di) * (dj) * (dk);
+    x(i+1,j+1,k+1) += value[0] * (di) * (dj) * (dk);
 
-    _dataY(i,j,k) += value[1] * (1-di) * (1-dj) * (1-dk);
-    _dataY(i+1,j,k) += value[1] * (di) * (1-dj) * (1-dk);
-    _dataY(i,j+1,k) += value[1] * (1-di) * (dj) * (1-dk); 
-    _dataY(i+1,j+1,k) += value[1] * (di) * (dj) * (1-dk);
-    _dataY(i,j,k+1) += value[1] * (1-di) * (1-dj) * (dk);
-    _dataY(i+1,j,k+1) += value[1] * (di) * (1-dj) * (dk);
-    _dataY(i,j+1,k+1) += value[1] * (1-di) * (dj) * (dk);
-    _dataY(i+1,j+1,k+1) += value[1] * (di) * (dj) * (dk);
+    y(i,j,k) += value[1] * (1-di) * (1-dj) * (1-dk);
+    y(i+1,j,k) += value[1] * (di) * (1-dj) * (1-dk);
+    y(i,j+1,k) += value[1] * (1-di) * (dj) * (1-dk); 
+    y(i+1,j+1,k) += value[1] * (di) * (dj) * (1-dk);
+    y(i,j,k+1) += value[1] * (1-di) * (1-dj) * (dk);
+    y(i+1,j,k+1) += value[1] * (di) * (1-dj) * (dk);
+    y(i,j+1,k+1) += value[1] * (1-di) * (dj) * (dk);
+    y(i+1,j+1,k+1) += value[1] * (di) * (dj) * (dk);
 
-    _dataZ(i,j,k) += value[2] * (1-di) * (1-dj) * (1-dk);
-    _dataZ(i+1,j,k) += value[2] * (di) * (1-dj) * (1-dk);
-    _dataZ(i,j+1,k) += value[2] * (1-di) * (dj) * (1-dk); 
-    _dataZ(i+1,j+1,k) += value[2] * (di) * (dj) * (1-dk);
-    _dataZ(i,j,k+1) += value[2] * (1-di) * (1-dj) * (dk);
-    _dataZ(i+1,j,k+1) += value[2] * (di) * (1-dj) * (dk);
-    _dataZ(i,j+1,k+1) += value[2] * (1-di) * (dj) * (dk);
-    _dataZ(i+1,j+1,k+1) += value[2] * (di) * (dj) * (dk);
+    z(i,j,k) += value[2] * (1-di) * (1-dj) * (1-dk);
+    z(i+1,j,k) += value[2] * (di) * (1-dj) * (1-dk);
+    z(i,j+1,k) += value[2] * (1-di) * (dj) * (1-dk); 
+    z(i+1,j+1,k) += value[2] * (di) * (dj) * (1-dk);
+    z(i,j,k+1) += value[2] * (1-di) * (1-dj) * (dk);
+    z(i+1,j,k+1) += value[2] * (di) * (1-dj) * (dk);
+    z(i,j+1,k+1) += value[2] * (1-di) * (dj) * (dk);
+    z(i+1,j+1,k+1) += value[2] * (di) * (dj) * (dk);
 
     return;
 }
@@ -313,42 +327,32 @@ void Field3::gather(const Eigen::Vector3d& l, Eigen::Vector3d& value) {
     double dk = l(2) - k;
     
     // Interpolate data from surrounding nodes for each component of the field
-    value[0] = (1-di)*(1-dj)*(1-dk)*_dataX(i,j,k) +
-            (di)*(1-dj)*(1-dk)*_dataX(i+1,j,k) +
-            (1-di)*(dj)*(1-dk)*_dataX(i,j+1,k) + 
-            (di)*(dj)*(1-dk)*_dataX(i+1,j+1,k) +
-            (1-di)*(1-dj)*(dk)*_dataX(i,j,k+1) +
-            (di)*(1-dj)*(dk)*_dataX(i+1,j,k+1) +
-            (1-di)*(dj)*(dk)*_dataX(i,j+1,k+1) +
-            (di)*(dj)*(dk)*_dataX(i+1,j+1,k+1);
+    value[0] = (1-di) * (1-dj) * (1-dk) * x(i,j,k) +
+            (di) * (1-dj) * (1-dk) * x(i+1,j,k) +
+            (1-di) * (dj) * (1-dk) * x(i,j+1,k) + 
+            (di) * (dj) * (1-dk) * x(i+1,j+1,k) +
+            (1-di) * (1-dj) * (dk) * x(i,j,k+1) +
+            (di) * (1-dj) * (dk) * x(i+1,j,k+1) +
+            (1-di) * (dj) * (dk) * x(i,j+1,k+1) +
+            (di) * (dj) * (dk) * x(i+1,j+1,k+1);
 
-    value[1] = (1-di)*(1-dj)*(1-dk)*_dataY(i,j,k) +
-            (di)*(1-dj)*(1-dk)*_dataY(i+1,j,k) +
-            (1-di)*(dj)*(1-dk)*_dataY(i,j+1,k) + 
-            (di)*(dj)*(1-dk)*_dataY(i+1,j+1,k) +
-            (1-di)*(1-dj)*(dk)*_dataY(i,j,k+1) +
-            (di)*(1-dj)*(dk)*_dataY(i+1,j,k+1) +
-            (1-di)*(dj)*(dk)*_dataY(i,j+1,k+1) +
-            (di)*(dj)*(dk)*_dataY(i+1,j+1,k+1);
+    value[1] = (1-di) * (1-dj) * (1-dk) * y(i,j,k) +
+            (di) * (1-dj) * (1-dk) * y(i+1,j,k) +
+            (1-di) * (dj) * (1-dk) * y(i,j+1,k) + 
+            (di) * (dj) * (1-dk) * y(i+1,j+1,k) +
+            (1-di) * (1-dj) * (dk) * y(i,j,k+1) +
+            (di) * (1-dj) * (dk) * y(i+1,j,k+1) +
+            (1-di) * (dj) * (dk) * y(i,j+1,k+1) +
+            (di) * (dj) * (dk) * y(i+1,j+1,k+1);
 
-    value[2] = (1-di)*(1-dj)*(1-dk)*_dataZ(i,j,k) +
-            (di)*(1-dj)*(1-dk)*_dataZ(i+1,j,k) +
-            (1-di)*(dj)*(1-dk)*_dataZ(i,j+1,k) + 
-            (di)*(dj)*(1-dk)*_dataZ(i+1,j+1,k) +
-            (1-di)*(1-dj)*(dk)*_dataZ(i,j,k+1) +
-            (di)*(1-dj)*(dk)*_dataZ(i+1,j,k+1) +
-            (1-di)*(dj)*(dk)*_dataZ(i,j+1,k+1) +
-            (di)*(dj)*(dk)*_dataZ(i+1,j+1,k+1);
+    value[2] = (1-di) * (1-dj) * (1-dk) * z(i,j,k) +
+            (di) * (1-dj) * (1-dk) * z(i+1,j,k) +
+            (1-di) * (dj) * (1-dk) * z(i,j+1,k) + 
+            (di) * (dj) * (1-dk) * z(i+1,j+1,k) +
+            (1-di) * (1-dj) * (dk) * z(i,j,k+1) +
+            (di) * (1-dj) * (dk) * z(i+1,j,k+1) +
+            (1-di) * (dj) * (dk) * z(i,j+1,k+1) +
+            (di) * (dj) * (dk) * z(i+1,j+1,k+1);
 
     return; 
 }
-
-Eigen::Vector3d& Field3::operator()(const int& i, const int& j, const int& k) {
-
-    static Eigen::Vector3d value; // Static variable to hold the value to return a reference to
-
-    value[0] = _dataX(i,j,k);
-    value[1] = _dataY(i,j,k);
-    value[2] = _dataZ(i,j,k);
-
-    return value;

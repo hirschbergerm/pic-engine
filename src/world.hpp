@@ -1,5 +1,6 @@
 #include <Eigen/Core>
 #include <vector>
+#include <random>
 
 #ifndef WORLD_HPP
 #define WORLD_HPP
@@ -34,7 +35,7 @@ class World {
         // Fields
         class Field<double> _phi; // Electric potential
         class Field<double> _rho; // Charge density
-        class Field3<double> _E; // Electric field
+        class Field3 _E; // Electric field
 
     private:
 
