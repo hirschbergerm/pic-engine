@@ -96,8 +96,10 @@ auto PotentialSolver::computeElectricField() -> void {
     for (int i=0; i<_world._nn[0]; i++) {
         for (int j=0; j<_world._nn[1]; j++) {
             for (int k=0; k<_world._nn[2]; k++) {
-                // Compute the electric field components using central differences
-                double Ex = 0.0, Ey = 0.0, Ez = 0.0;
+                // Get references to field components to update
+                double& Ex = E.x(i,j,k);
+                double& Ey = E.y(i,j,k);
+                double& Ez = E.z(i,j,k);
 
                 // x component
                 if (i==0) {
@@ -124,7 +126,6 @@ auto PotentialSolver::computeElectricField() -> void {
                     Ez = -(phi(i,j,k+1) - phi(i,j,k-1)) / (2.0 * dh[2]); // central difference
                 }
 
-                E(i,j,k) = Eigen::Vector3d(Ex, Ey, Ez);
             }
         }
     }   
