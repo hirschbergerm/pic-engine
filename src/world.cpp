@@ -16,10 +16,6 @@ explicit World::World(const int& ni, const int& nj, const int& nk) :
     _node_vol(ni, nj, nk)
     {}
 
-World::~World() {
-
-}
-
 /**
  * @brief Converts from physical coordinates to logical (cell-centered) coordinates.
  * 
@@ -103,4 +99,32 @@ void World::compute_charge_density() {
 
     }
 
+} 
+
+/**
+ * @brief Advances the simulation time by one timestep. If the simulation has reached the end, it returns false to signal that the simulation is over.
+ */
+bool::World::advance_time() {
+    
+    // Check that the user doesn't advance time beyond the number of timesteps specified. 
+    if (_current_timestep >= _num_timesteps) {
+        return false; 
+    }
+
+    _current_time += _dt;
+    _current_timestep++;
+
+    return _current_timestep < _num_timesteps;
+
 }
+
+void World::particle_push() {
+
+    for (auto& species: _species) {
+
+        species->push_particles();
+
+    }
+
+}
+
