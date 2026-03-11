@@ -78,6 +78,8 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d& box_min, Eigen::Ve
     // Resize the storage vectors
     resize_storage(total_num_sim_particles);
 
+    double dt = _world.get_dt();
+
     // Begin loading particles on equally spaced grid
     for (int i = 0; i < num_sim_particles[0]; i++) {
         for (int j = 0; j < num_sim_particles[1]; j++) {
@@ -108,12 +110,16 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d& box_min, Eigen::Ve
                 _vy[p] = 0.0;
                 _vz[p] = 0.0;
 
+                // Do half-timestep velocity rewind for leapfrog scheme
+                _vx[p] =(_charge * _world._E.x(0,0,0) / _mass) * (dt / 2.0);
+                _vy[p] =(_charge * _world._E.y(0,0,0) / _mass) * (dt / 2.0);
+                _vz[p] =(_charge * _world._E.z(0,0,0) / _mass) * (dt / 2.0);
+
                 // Set macroparticle weight (mpw * relative scaling value)
                 _mpwt[p] = mpw * w; 
             }
         }
     }
-
 }
 
 /**
@@ -160,12 +166,13 @@ void Species::compute_number_density() {
 
 void Species::push_particles() {
     // Get time step from simulation domain
-    double dt = _world._dt;
+    double dt = _world.get_dt();
 
     // Get mesh bounds
     Eigen::Vector3d x_origin = _world.get_origin();
-    Eigen::Vector3d x_max = _world._xmax;
+    Eigen::Vector3d x_max = _world.get_xmax();
 
+    // Loop over all sim particles
     for (int p = 0; p < _x.size(); p++) {
 
         // Get logical coordinate 
@@ -184,6 +191,34 @@ void Species::push_particles() {
         _x[p] += _vx[p]*dt;
         _y[p] += _vy[p]*dt;
         _z[p] += _vz[p]*dt;
+
+        l = _world.XtoL({_x[p], _y[p], _z[p]}); // Update logical coordinate after moving the particle
+
+        // Reflect the particle if it leaves the domain. Right now we are assuming reflective walls
+        //!!! Big optimization needed here
+        if (l[0] < 0) {
+            _x[p] = 2*x_origin[0] - _x[p];
+            _vx[p] = -_vx[p];   
+        } else if (l[0] > _world._ni) {
+            _x[p] = 2*x_max[0] - _x[p];
+            _vx[p] = -_vx[p];   
+        }
+
+        if (l[1] < 0) {
+            _y[p] = 2*x_origin[1] - _y[p];
+            _vy[p] = -_vy[p];   
+        } else if (l[1] > _world._nj) {
+            _y[p] = 2*x_max[1] - _y[p];
+            _vy[p] = -_vy[p];   
+        }
+
+        if (l[2] < 0) {
+            _z[p] = 2*x_origin[2] - _z[p];
+            _vz[p] = -_vz[p];   
+        } else if (l[2] > _world._nk) {
+            _z[p] = 2*x_max[2] - _z[p];
+            _vz[p] = -_vz[p];   
+        }
 
     }
 

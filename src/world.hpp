@@ -20,13 +20,41 @@ class World {
         const Eigen::Vector3d XtoL(const Eigen::Vector3d& x);
         const Eigen::Vector3d get_dh();
         const Eigen::Vector3d get_origin();
+        inline Eigen::Vector3d get_xmax() {
+            return _xmax;
+        };
+
         const Field<double>& get_node_volumes();
+
+        inline double get_dt() const { 
+            return _dt;
+        };
+
+        inline double get_time() const {
+            return _current_time;
+        };
+
+        inline double get_timestep() const {
+            return _current_timestep;
+        }
+
+        inline bool is_last_timestep() const {
+            return _current_timestep == _num_timesteps - 1;
+        }
 
         // Setters
         void set_extents(const double& x1, const double& y1, const double& z1,
                         const double& x2, const double& y2, const double& z2);
 
-        void set_time(double dt, int num_ts);
+        /**
+         * @brief set the simulation timestep size and the number of timesteps to run.
+         */
+        inline void set_time(double dt, int num_timesteps) {
+            _dt = dt;
+            _num_timesteps = num_timesteps;
+        };
+
+        bool advance_time();
 
         void compute_node_volumes();
         void compute_charge_density();
@@ -54,6 +82,9 @@ class World {
 
         double _dt;
         int _num_timesteps;
+
+        double _current_time;
+        int _current_timestep;
 
 };
 
