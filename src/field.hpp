@@ -1,4 +1,5 @@
 #include <Eigen/Core>
+#include <ostream>
 
 #ifndef FIELD_HPP
 #define FIELD_HPP
@@ -52,6 +53,9 @@ class Field {
 
 };
 
+// Stream output operator declaration
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const Field<T>& field);
 
 class Field3 {
     public: 
@@ -86,6 +90,19 @@ class Field3 {
         inline double& z(size_t i, size_t j, size_t k) { 
             return _dataZ[index(i,j,k)];
         };
+
+        // Const component access operators.
+        inline const size_t ni() const{
+            return _ni;
+        }
+
+        inline const size_t nj() const{
+            return _nj;
+        }
+
+        inline const size_t nk() const{
+            return _nk;
+        }
 
     private:
         std::vector<double> _dataX;
@@ -122,5 +139,8 @@ class Field3 {
 
         const size_t _ni, _nj, _nk; // Number of nodes in each direction
 }; 
+
+// Declare output stream operator for Field3
+std::ostream& operator<<(std::ostream& out, const Field3& field);
 
 #endif // FIELD_HPP

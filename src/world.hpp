@@ -1,6 +1,7 @@
 #include <Eigen/Core>
 #include <vector>
 #include <random>
+#include "field.hpp"
 
 #ifndef WORLD_HPP
 #define WORLD_HPP
