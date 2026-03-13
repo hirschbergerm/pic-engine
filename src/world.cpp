@@ -1,6 +1,7 @@
 #include "world.hpp"
 #include "species.hpp"
 #include "field.hpp"
+#include "constants.hpp"
 
 /**
  * @brief Explicit constructor for the World class.
@@ -125,6 +126,9 @@ bool::World::advance_time() {
 
 }
 
+/**
+ * @brief Call the particle push method for every species in the simulation domain
+ */
 void World::particle_push() {
 
     for (auto& species: _species) {
@@ -132,6 +136,28 @@ void World::particle_push() {
         species->push_particles();
 
     }
+
+}
+
+/**
+ * @brief Calculates the total potential energy of the system
+ */
+void World::get_potential_energy(double& pe) const {
+
+    pe = 0.0;
+    Eigen::Vector3d ef{0.0};
+
+    for (int i = 0; i < _ni; i++) {
+        for (int j = 0; j < _nj; j++) {
+            for (int k = 0; k < _nk; k++) {
+                ef = _E(i, j, k); // Get field value at node i,j,k 
+                double ef2 = ef[0]* ef[0] + ef[1]*ef[1] + ef[2]*ef[2]; // Take L2 norm of field at this point
+                pe += ef2*_node_vol(i, j, k); // Add contribution to potential energy using the node volume as a weight
+            }
+        }
+    }
+
+    pe *= 0.5 * Const::EPS_0; // Scale by proper physical factor
 
 }
 

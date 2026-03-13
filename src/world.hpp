@@ -28,6 +28,8 @@ class World {
 
         const Field<double>& get_node_volumes();
 
+        void get_potential_energy(double& pe) const;
+
         inline double get_dt() const { 
             return _dt;
         };
@@ -36,7 +38,7 @@ class World {
             return _current_time;
         };
 
-        inline double get_timestep() const {
+        inline int get_timestep() const {
             return _current_timestep;
         }
 
