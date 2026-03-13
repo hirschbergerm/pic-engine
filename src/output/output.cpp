@@ -1,8 +1,9 @@
 #include "output.hpp"
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
-void Output::fields(World& world) {
+void Output::fields_output(World& world, std::vector<Species>& species) {
     // Build filename
     std::stringstream name;
     name<<"fields.vti";
@@ -42,6 +43,13 @@ void Output::fields(World& world) {
     file<<world._rho;
     file<<"</DataArray>\n";
 
+    // Species number density
+    for (auto& sp: species) {
+        file<<"<DataArray Name=\"NumberDensity."<<sp._name<<"\" type=\"Float64\" NumberOfComponents=\"1\" format=\"ascii\">\n";
+        file<<sp._den;
+        file<<"</DataArray>\n";
+    }
+
     // Electric Field
     file<<"<DataArray Name=\"ElectricField\" type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
     file<<world._E;
@@ -54,4 +62,18 @@ void Output::fields(World& world) {
 
     // Close the file explicitly
     file.close();
+}
+
+void Output::screen_output(World &world, std::vector<Species>& species) {
+    std::cout<<"ts: "<<world.get_time();
+    for (auto& sp : species) {
+        std::cout<<std::setprecision(3)<<"\t"<<sp._name<<":"<<0;
+    }
+    std::cout<<std::endl;
+}
+
+void Output::diagnostic_output() {
+    
+    
+
 }

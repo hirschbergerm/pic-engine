@@ -13,7 +13,8 @@ explicit World::World(const int& ni, const int& nj, const int& nk) :
     _phi(ni, nj, nk),
     _rho(ni, nj, nk),
     _E(ni, nj, nk),
-    _node_vol(ni, nj, nk)
+    _node_vol(ni, nj, nk),
+    _start_time(std::chrono::high_resolution_clock::now())
     {}
 
 /**
@@ -40,6 +41,12 @@ const Eigen::Vector3d World::get_origin() {
 
 const Field<double>& World::get_node_volumes() {
     return _node_vol;
+}
+
+double World::get_wall_time() const {
+    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = now - _start_time;
+    return elapsed.count();
 }
 
 void World::set_extents(const double& x1, const double& y1, const double& z1, const double& x2, const double& y2, const double& z2) {

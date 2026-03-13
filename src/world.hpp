@@ -1,6 +1,7 @@
 #include <Eigen/Core>
 #include <vector>
 #include <random>
+#include <chrono>
 #include "field.hpp"
 
 #ifndef WORLD_HPP
@@ -38,6 +39,8 @@ class World {
         inline double get_timestep() const {
             return _current_timestep;
         }
+
+        double get_wall_time() const;
 
         inline bool is_last_timestep() const {
             return _current_timestep == _num_timesteps - 1;
@@ -86,6 +89,8 @@ class World {
 
         double _current_time;
         int _current_timestep;
+
+        std::chrono::high_resolution_clock::time_point _start_time; // Start time of the simulation, used for wall clock timing
 
 };
 
