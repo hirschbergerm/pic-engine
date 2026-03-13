@@ -1,6 +1,7 @@
 #include "world.hpp"
 #include "species.hpp"
 #include "field.hpp"
+#include "constants.hpp"
 
 /**
  * @brief Explicit constructor for the World class.
@@ -13,7 +14,8 @@ explicit World::World(const int& ni, const int& nj, const int& nk) :
     _phi(ni, nj, nk),
     _rho(ni, nj, nk),
     _E(ni, nj, nk),
-    _node_vol(ni, nj, nk)
+    _node_vol(ni, nj, nk),
+    _start_time(std::chrono::high_resolution_clock::now())
     {}
 
 /**
@@ -40,6 +42,12 @@ const Eigen::Vector3d World::get_origin() {
 
 const Field<double>& World::get_node_volumes() {
     return _node_vol;
+}
+
+double World::get_wall_time() const {
+    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = now - _start_time;
+    return elapsed.count();
 }
 
 void World::set_extents(const double& x1, const double& y1, const double& z1, const double& x2, const double& y2, const double& z2) {
@@ -118,6 +126,9 @@ bool::World::advance_time() {
 
 }
 
+/**
+ * @brief Call the particle push method for every species in the simulation domain
+ */
 void World::particle_push() {
 
     for (auto& species: _species) {
@@ -125,6 +136,28 @@ void World::particle_push() {
         species->push_particles();
 
     }
+
+}
+
+/**
+ * @brief Calculates the total potential energy of the system
+ */
+void World::get_potential_energy(double& pe) const {
+
+    pe = 0.0;
+    Eigen::Vector3d ef{0.0};
+
+    for (int i = 0; i < _ni; i++) {
+        for (int j = 0; j < _nj; j++) {
+            for (int k = 0; k < _nk; k++) {
+                ef = _E(i, j, k); // Get field value at node i,j,k 
+                double ef2 = ef[0]* ef[0] + ef[1]*ef[1] + ef[2]*ef[2]; // Take L2 norm of field at this point
+                pe += ef2*_node_vol(i, j, k); // Add contribution to potential energy using the node volume as a weight
+            }
+        }
+    }
+
+    pe *= 0.5 * Const::EPS_0; // Scale by proper physical factor
 
 }
 

@@ -131,6 +131,21 @@ Field<T>& Field<T>::operator/=(const Field<T>& other) {
 }
 
 /**
+ * @brief Output stream operator for Field class. 
+ */
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const Field<T>& field) {
+    for (size_t k=0; k < field._nk; k++,out<<"\n") { // Write a new line each time we move to a new k plane
+        for (size_t j=0; j < field._nj; j++) {
+            for (size_t i=0; i< field._ni; i++) {
+                out<<field(i,j,k)<<" "; // Write the field value at (i,j,k) followed by a space
+            }
+        }
+    }
+    return out;
+}
+
+/**
  * @brief Checks if the logical coordinate l is within bounds of the field.
  * 
  * @param l The logical coordinate to check (3D vector).
@@ -231,6 +246,9 @@ void Field<T>::gather(const Eigen::Vector3d& l, T& value) {
 // Field method explicit instantiations
 template void Field<double>::gather(const Eigen::Vector3d& l, double& value);
 template void Field<double>::scatter(const Eigen::Vector3d& l, const double& value);
+
+// Explicit instantiation of the stream operator for Field<double>
+template std::ostream& operator<< <double>(std::ostream& out, const Field<double>& field);
 
 // Field 3 methods
 Field3::Field3(size_t ni, size_t nj, size_t nk) : 
@@ -355,4 +373,19 @@ void Field3::gather(const Eigen::Vector3d& l, Eigen::Vector3d& value) {
             (di) * (dj) * (dk) * z(i+1,j+1,k+1);
 
     return; 
+}
+
+std::ostream& operator<<(std::ostream& out, const Field3& field) {
+
+    Eigen::Vector3d vec({0,0,0});
+    for (size_t k=0; k < field.nk(); k++,out<<"\n") { // Write a new line each time we move to a new k plane
+        for (size_t j=0; j < field.nj(); j++) {
+            for (size_t i=0; i< field.ni(); i++) {
+                vec = field(i,j,k);
+                out<<vec[0]<<" "<<vec[1]<<" "<<vec[2]<<" ";
+            }
+        }
+    }
+    return out;
+
 }

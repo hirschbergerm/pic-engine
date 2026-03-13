@@ -2,7 +2,7 @@
 #include "world.hpp"
 
 /**
- * 
+ * @brief Species default constructor.
  */
 explicit Species::Species(std::string name, double mass, double charge, World& world) : 
     _name(name), 
@@ -164,6 +164,11 @@ void Species::compute_number_density() {
 
 }
 
+/**
+ * @brief Pushes particles using a simple Leapfrog scheme.
+ * 
+ * @return Modifies members
+ */
 void Species::push_particles() {
     // Get time step from simulation domain
     double dt = _world.get_dt();
@@ -188,9 +193,9 @@ void Species::push_particles() {
         _vz[p] += ef[2] * dt * (_charge / _mass);
 
         // Update position using v = dx/dt
-        _x[p] += _vx[p]*dt;
-        _y[p] += _vy[p]*dt;
-        _z[p] += _vz[p]*dt;
+        _x[p] += _vx[p] * dt;
+        _y[p] += _vy[p] * dt;
+        _z[p] += _vz[p] * dt;
 
         l = _world.XtoL({_x[p], _y[p], _z[p]}); // Update logical coordinate after moving the particle
 
@@ -222,4 +227,41 @@ void Species::push_particles() {
 
     }
 
+}
+
+void Species::get_kinetic_energy(double& ke) const {
+    ke = 0.0;
+    for (int p = 0; p < _x.size(); p++) {
+        double v2 = _vx[p]*_vx[p] + _vy[p]*_vy[p] + _vz[p]*_vz[p];
+        ke += _mpwt[p] * v2;
+    }
+
+    ke *= 0.5 * _mass;
+}
+
+void Species::get_momentum(double& px, double& py, double& pz) const {
+    px = 0.0;
+    py = 0.0;
+    pz = 0.0;
+
+    for (int p = 0; p < _x.size(); p++) {
+        px += _vx[p] * _mpwt[p];
+        py += _vy[p] * _mpwt[p];
+        pz += _vz[p] * _mpwt[p];
+    }
+
+    px *= _mass;
+    py *= _mass;
+    pz *= _mass;
+}
+
+void Species::get_macro_particle_count(double& mp_count) const {
+    mp_count = _x.size();
+}
+
+void Species::get_real_count(double& real_count) const {
+    real_count = 0.0;
+    for (int p = 0; p < _x.size(); p++) {
+        real_count += _mpwt[p];
+    }
 }
