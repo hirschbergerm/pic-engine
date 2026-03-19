@@ -13,7 +13,7 @@ class Species {
 
         // Public Methods
         void load_particles_box(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, int num_particles); 
-        void load_particles_box_quiet_start(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, Eigen::Vector3i& num_sim_particles);
+        void load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vector3d box_max, double num_density, Eigen::Vector3i num_sim_particles);
         void compute_number_density();
 
         void push_particles();

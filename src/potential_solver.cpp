@@ -86,7 +86,7 @@ auto PotentialSolver::solve() -> bool {
  * @param phi The electric potential field (input).
  * @param E The electric field to be computed (modified in place).
 */
-auto PotentialSolver::computeElectricField() -> void {
+auto PotentialSolver::compute_electric_field() -> void {
  
     Field<double>& phi = _world._phi;
     Field3& E = _world._E;

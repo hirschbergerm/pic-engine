@@ -1,6 +1,5 @@
 #include "world.hpp"
 #include "species.hpp"
-#include "field.hpp"
 #include "constants.hpp"
 
 /**
@@ -32,15 +31,19 @@ const Eigen::Vector3d World::XtoL(const Eigen::Vector3d& x) {
     return l;
 }
 
-const Eigen::Vector3d World::get_dh() {
+Eigen::Vector3d World::get_dh() const {
     return _dh;
 }
 
-const Eigen::Vector3d World::get_origin() {
+Eigen::Vector3d World::get_origin() const {
     return _x0;
 }
 
-const Field<double>& World::get_node_volumes() {
+Eigen::Vector3d World::get_xmax() const {
+    return _xmax;
+}
+
+const Field<double>& World::get_node_volumes() const {
     return _node_vol;
 }
 
@@ -95,15 +98,15 @@ void World::compute_node_volumes() {
     }
 }
 
-void World::compute_charge_density() {
+void World::compute_charge_density(const std::vector<Species*>& species) {
 
     _rho = 0.0; // Initialize the charge density field to zero
 
-    for (const auto& species : _species) {
-        if (species->_charge == 0.0) continue; // Skip neutral species
+    for (const auto& sp : species) {
+        if (sp->_charge == 0.0) continue; // Skip neutral species
 
-        species->_den *= species->_charge; // Scale density by charge to get charge density contribution from this species
-        _rho += species->_den; // Add this species' contribution to the total charge density
+        sp->_den *= sp->_charge; // Scale density by charge to get charge density contribution from this species
+        _rho += sp->_den; // Add this species' contribution to the total charge density
 
     }
 
@@ -123,19 +126,6 @@ bool::World::advance_time() {
     _current_timestep++;
 
     return _current_timestep < _num_timesteps;
-
-}
-
-/**
- * @brief Call the particle push method for every species in the simulation domain
- */
-void World::particle_push() {
-
-    for (auto& species: _species) {
-
-        species->push_particles();
-
-    }
 
 }
 
