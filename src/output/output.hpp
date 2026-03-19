@@ -1,3 +1,7 @@
+#pragma once
+#ifndef OUTPUT_HPP
+#define OUTPUT_HPP
+
 #include "world.hpp" 
 #include "species.hpp"
 #include <fstream>
@@ -10,3 +14,5 @@ namespace Output {
 
     std::ofstream f_diag;
 }
+
+#endif // OUTPUT_HPP

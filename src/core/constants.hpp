@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 

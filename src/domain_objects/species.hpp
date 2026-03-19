@@ -1,8 +1,9 @@
-#include <string>
-#include "field.hpp"
-
+#pragma once
 #ifndef SPECIES_HPP
 #define SPECIES_HPP
+
+#include <string>
+#include "field.hpp"
 
 class Species {
     public:

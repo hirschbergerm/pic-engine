@@ -16,6 +16,7 @@ target_link_libraries(pic-sim
         core
         solvers
         domain_objects
+        output
 )
 
 add_subdirectory(src)
