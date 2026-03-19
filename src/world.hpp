@@ -20,13 +20,11 @@ class World {
 
         // Getters
         const Eigen::Vector3d XtoL(const Eigen::Vector3d& x);
-        const Eigen::Vector3d get_dh();
-        const Eigen::Vector3d get_origin();
-        inline Eigen::Vector3d get_xmax() {
-            return _xmax;
-        };
+        Eigen::Vector3d get_dh() const;
+        Eigen::Vector3d get_origin() const;
+        Eigen::Vector3d get_xmax() const;
 
-        const Field<double>& get_node_volumes();
+        const Field<double>& get_node_volumes() const;
 
         void get_potential_energy(double& pe) const;
 
@@ -63,9 +61,7 @@ class World {
         bool advance_time();
 
         void compute_node_volumes();
-        void compute_charge_density();
-
-        void particle_push();
+        void compute_charge_density(const std::vector<class Species*>& species);
 
         const Eigen::Vector3i _nn; // Number of cells as an Eigen vector
         const int _ni, _nj, _nk; // Number of cells along each dimension
@@ -83,8 +79,6 @@ class World {
         Eigen::Vector3d _xmax; // Maximum coordinate along each dimension
         Eigen::Vector3d _xc; // Domain centroid
         class Field<double> _node_vol; // Volume associated with each grid node
-
-        std::vector<class Species*> _species;
 
         double _dt;
         int _num_timesteps;

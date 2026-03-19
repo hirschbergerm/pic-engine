@@ -11,7 +11,7 @@ class PotentialSolver {
         ~PotentialSolver();
 
         auto solve() -> bool; // Solve Poisson's Equation
-        auto computeElectricField() -> void; // Calculates static EF = -grad(phi)
+        auto compute_electric_field() -> void; // Calculates static EF = -grad(phi)
 
     private:
         // I disagree with the idea of making world a private member

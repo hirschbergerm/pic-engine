@@ -62,7 +62,7 @@ void Species::load_particles_box(Eigen::Vector3d& box_min, Eigen::Vector3d box_m
  * 
  * @param
  */
-void Species::load_particles_box_quiet_start(Eigen::Vector3d& box_min, Eigen::Vector3d box_max, double num_density, Eigen::Vector3i& num_sim_particles) {
+void Species::load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vector3d box_max, double num_density, Eigen::Vector3i num_sim_particles) {
 
     double box_volume = (box_max[0] - box_min[0]) * (box_max[1] - box_min[1]) * (box_max[2] - box_min[2]);
     int total_num_sim_particles = (num_sim_particles[0]-1) * (num_sim_particles[1]-1) * (num_sim_particles[2]-1);
