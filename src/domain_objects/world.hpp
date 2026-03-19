@@ -1,11 +1,12 @@
+#pragma once
+#ifndef WORLD_HPP
+#define WORLD_HPP
+
 #include <Eigen/Core>
 #include <vector>
 #include <random>
 #include <chrono>
 #include "field.hpp"
-
-#ifndef WORLD_HPP
-#define WORLD_HPP
 
 // Not sure if I want this to be a pure singleton yet
 class World {

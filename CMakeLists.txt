@@ -1,8 +1,22 @@
 cmake_minimum_required(VERSION 4.0)
 
-project(pic-engine)
+project(pic-engine
+    VERSION 0.1
+    LANGUAGES CXX
+)
 
-add_executable(pic src/main.cpp)
+set(CMAKE_CXX_STANDARD 17)
 
-target_include_directories(pic PRIVATE ${PROJECT_SOURCE_DIR}/external/eigen-5.0.0)
+add_executable(pic-sim
+    src/main.cpp
+)
+
+target_link_libraries(pic-sim
+    PRIVATE
+        core
+        solvers
+        domain_objects
+)
+
+add_subdirectory(src)
 
