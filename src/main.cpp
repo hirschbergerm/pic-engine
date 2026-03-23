@@ -4,9 +4,10 @@
 
 #include "constants.hpp"
 #include "world.hpp"
+#include "field.hpp"
 #include "species.hpp"
 #include "potential_solver.hpp"
-#include "./output/output.hpp"
+#include "output.hpp"
 
 int main(int argc, char* argv[]) {
     
@@ -49,11 +50,11 @@ int main(int argc, char* argv[]) {
         }
 
         // Screen and file output
-        Output::sccreen_output(world, species);
+        Output::screen_output(world, species);
         Output::diagnostic_output(world, species);
 
         // periodically write output files for visualization
-        if (world.get_time_step() % 100 == 0 || world.is_last_timestep()) {
+        if (world.get_timestep() % 100 == 0 || world.is_last_timestep()) {
             Output::fields_output(world, species);
         }
     }

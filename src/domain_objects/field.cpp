@@ -5,7 +5,7 @@ template <typename T>
 Field<T>::Field(size_t ni, size_t nj, size_t nk) : _ni(ni), _nj(nj), _nk(nk) {
 
     _data.resize(ni * nj * nk); // Resize the data vector to hold all field values
-    _data.assign(0.0); // Initialize all field values to 0.0
+    _data.assign(_data.size(), T{}); // Initialize all field values to 0.0
 
 }
 
@@ -81,7 +81,7 @@ Field<T>& Field<T>::operator/=(const T& value) {
     // Modify in place using lambda function
     std::transform(_data.begin(), _data.end(), _data.begin(), [&value](T& element) {
         return element / value; // Divide each element by the passed value
-    })
+    });
 
     return *this;
 
@@ -135,9 +135,10 @@ Field<T>& Field<T>::operator/=(const Field<T>& other) {
  */
 template <typename T>
 std::ostream& operator<<(std::ostream& out, const Field<T>& field) {
-    for (size_t k=0; k < field._nk; k++,out<<"\n") { // Write a new line each time we move to a new k plane
-        for (size_t j=0; j < field._nj; j++) {
-            for (size_t i=0; i< field._ni; i++) {
+    
+    for (size_t k=0; k < field.nk(); k++,out<<"\n") { // Write a new line each time we move to a new k plane
+        for (size_t j=0; j < field.nj(); j++) {
+            for (size_t i=0; i< field.ni(); i++) {
                 out<<field(i,j,k)<<" "; // Write the field value at (i,j,k) followed by a space
             }
         }
@@ -190,14 +191,14 @@ void Field<T>::scatter(const Eigen::Vector3d& l, const T& value) {
     double dk = l(2) - k;
 
     // Scatter data to the surrounding nodes
-    _data(index(i,j,k)) += value * (1-di) * (1-dj) * (1-dk);
-    _data(index(i+1,j,k)) += value * (di) * (1-dj) * (1-dk);
-    _data(index(i,j+1,k)) += value * (1-di) * (dj) * (1-dk); 
-    _data(index(i+1,j+1,k)) += value * (di) * (dj) * (1-dk);
-    _data(index(i,j,k+1)) += value * (1-di) * (1-dj) * (dk);
-    _data(index(i+1,j,k+1)) += value * (di) * (1-dj) * (dk);
-    _data(index(i,j+1,k+1)) += value * (1-di) * (dj) * (dk);
-    _data(index(i+1,j+1,k+1)) += value * (di) * (dj) * (dk);
+    _data[index(i,j,k)] += value * (1-di) * (1-dj) * (1-dk);
+    _data[index(i+1,j,k)] += value * (di) * (1-dj) * (1-dk);
+    _data[index(i,j+1,k)] += value * (1-di) * (dj) * (1-dk); 
+    _data[index(i+1,j+1,k)] += value * (di) * (dj) * (1-dk);
+    _data[index(i,j,k+1)] += value * (1-di) * (1-dj) * (dk);
+    _data[index(i+1,j,k+1)] += value * (di) * (1-dj) * (dk);
+    _data[index(i,j+1,k+1)] += value * (1-di) * (dj) * (dk);
+    _data[index(i+1,j+1,k+1)] += value * (di) * (dj) * (dk);
 
 }
 
@@ -231,21 +232,16 @@ void Field<T>::gather(const Eigen::Vector3d& l, T& value) {
 
     // Interpolate data from surrounding nodes
     // We add the contributions from each of the surrounding nodes weighted by their distance to the logical coordinate
-    value = (1-di) * (1-dj) * (1-dk) * _data(index(i,j,k)) +
-            (di) * (1-dj) * (1-dk) * _data(index(i+1,j,k)) +
-            (1-di) * (dj) * (1-dk) * _data(index(i,j+1,k)) + 
-            (di) * (dj) * (1-dk) * _data(index(i+1,j+1,k)) +
-            (1-di) * (1-dj) * (dk) * _data(index(i,j,k+1)) +
-            (di) * (1-dj) * (dk) * _data(index(i+1,j,k+1)) +
-            (1-di) * (dj) * (dk) * _data(index(i,j+1,k+1)) +
-            (di) * (dj) * (dk) * _data(index(i+1,j+1,k+1));
+    value = (1-di) * (1-dj) * (1-dk) * _data[index(i,j,k)] +
+            (di) * (1-dj) * (1-dk) * _data[index(i+1,j,k)] +
+            (1-di) * (dj) * (1-dk) * _data[index(i,j+1,k)] + 
+            (di) * (dj) * (1-dk) * _data[index(i+1,j+1,k)] +
+            (1-di) * (1-dj) * (dk) * _data[index(i,j,k+1)] +
+            (di) * (1-dj) * (dk) * _data[index(i+1,j,k+1)] +
+            (1-di) * (dj) * (dk) * _data[index(i,j+1,k+1)] +
+            (di) * (dj) * (dk) * _data[index(i+1,j+1,k+1)];
 
-    return value;
 }
-
-// Field method explicit instantiations
-template void Field<double>::gather(const Eigen::Vector3d& l, double& value);
-template void Field<double>::scatter(const Eigen::Vector3d& l, const double& value);
 
 // Explicit instantiation of the stream operator for Field<double>
 template std::ostream& operator<< <double>(std::ostream& out, const Field<double>& field);

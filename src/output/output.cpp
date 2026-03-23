@@ -2,7 +2,9 @@
 #include <iostream>
 #include <iomanip>
 
-void Output::fields_output(World& world, std::vector<Species>& species) {
+std::ofstream Output::f_diag; // Define the static member variable for diagnostics output file
+
+void Output::fields_output(World& world, std::vector<Species*>& species) {
     // Build filename
     std::stringstream name;
     name<<"/results/fields_"<<std::setfill('0')<<std::setw(5)<<world.get_timestep()<<".vti";
@@ -44,8 +46,8 @@ void Output::fields_output(World& world, std::vector<Species>& species) {
 
     // Species number density
     for (auto& sp: species) {
-        file<<"<DataArray Name=\"NumberDensity."<<sp._name<<"\" type=\"Float64\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-        file<<sp._den;
+        file<<"<DataArray Name=\"NumberDensity."<<sp->_name<<"\" type=\"Float64\" NumberOfComponents=\"1\" format=\"ascii\">\n";
+        file<<sp->_den;
         file<<"</DataArray>\n";
     }
 
@@ -63,23 +65,22 @@ void Output::fields_output(World& world, std::vector<Species>& species) {
     file.close();
 }
 
-void Output::screen_output(World &world, std::vector<Species>& species) {
+void Output::screen_output(World &world, std::vector<Species*>& species) {
     std::cout<<"time: "<<world.get_time();
     for (auto& sp : species) {
-        std::cout<<std::setprecision(3)<<"\t"<<sp._name<<":"<<0;
+        std::cout<<std::setprecision(3)<<"\t"<<sp->_name<<":"<<0;
     }
     std::cout<<std::endl;
 }
 
-void Output::diagnostic_output(World& world, std::vector<Species>& species) {
-    using namespace Output;
+void Output::diagnostic_output(World& world, std::vector<Species*>& species) {
     
     if (!f_diag.is_open()){ // If file isn't open we create it
         f_diag.open("runtime_diags.csv"); // Create the file
         f_diag<<"ts,time,wall_time"; // make the csv columns
         for (auto& sp : species) {
-            f_diag<<",mp_count."<<sp._name<<",real_count."<<sp._name<<",KE."
-                <<sp._name<<",px."<<sp._name<<",py."<<sp._name<<",pz."<<sp._name; // make the csv columns for each species
+            f_diag<<",mp_count."<<sp->_name<<",real_count."<<sp->_name<<",KE."
+                <<sp->_name<<",px."<<sp->_name<<",py."<<sp->_name<<",pz."<<sp->_name; // make the csv columns for each species
         }
         f_diag<<",PE,total_E"<<std::endl; // finish header row
     }
@@ -91,10 +92,10 @@ void Output::diagnostic_output(World& world, std::vector<Species>& species) {
 
     for (auto& sp : species) {
         
-        sp.get_kinetic_energy(ke);
-        sp.get_momentum(px, py, pz);
-        sp.get_real_count(real_count);
-        sp.get_macro_particle_count(mp_count);
+        sp->get_kinetic_energy(ke);
+        sp->get_momentum(px, py, pz);
+        sp->get_real_count(real_count);
+        sp->get_macro_particle_count(mp_count);
         tot_ke += ke;
 
         f_diag<<","<<mp_count<<","<<real_count<<","<<ke<<","<<px<<","<<py<<","<<pz; // Write species diagnostics to file

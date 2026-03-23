@@ -1,8 +1,9 @@
-#include <Eigen/Core>
-#include <ostream>
-
+#pragma once
 #ifndef FIELD_HPP
 #define FIELD_HPP
+
+#include <Eigen/Core>
+#include <ostream>
 
 template <typename T>
 class Field {
@@ -39,6 +40,19 @@ class Field {
 
         bool in_bound_logical(const Eigen::Vector3d& l) const; // Check if the logical coordinate l is within bounds of the field
 
+        // Const component access operators.
+        inline const size_t ni() const{
+            return _ni;
+        }
+
+        inline const size_t nj() const{
+            return _nj;
+        }
+
+        inline const size_t nk() const{
+            return _nk;
+        }
+        
     private:
         std::vector<T> _data; // 3D field data
 
@@ -52,6 +66,8 @@ class Field {
         const size_t _ni, _nj, _nk; // Number of nodes in each direction
 
 };
+
+template class Field<double>;
 
 // Stream output operator declaration
 template <typename T>

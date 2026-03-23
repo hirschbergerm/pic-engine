@@ -11,4 +11,5 @@ target_include_directories(domain_objects
 target_link_libraries(domain_objects
     PUBLIC
         core
+        eigen
 )

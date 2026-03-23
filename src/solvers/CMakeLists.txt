@@ -9,4 +9,5 @@ target_include_directories(solvers
 target_link_libraries(solvers
     PUBLIC
         core
+        domain_objects
 )  

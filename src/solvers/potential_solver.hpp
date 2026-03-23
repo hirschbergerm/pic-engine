@@ -3,7 +3,6 @@
 #define POTENTIAL_SOLVER_HPP
 
 #include "world.hpp"
-#include <Eigen/Core>
 
 class PotentialSolver {
     public:

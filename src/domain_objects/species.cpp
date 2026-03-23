@@ -4,7 +4,7 @@
 /**
  * @brief Species default constructor.
  */
-explicit Species::Species(std::string name, double mass, double charge, World& world) : 
+Species::Species(std::string name, double mass, double charge, World& world) : 
     _name(name), 
     _mass(mass), 
     _charge(charge),
