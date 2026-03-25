@@ -4,9 +4,9 @@
 /**
  * @brief Species default constructor.
  */
-Species::Species(std::string name, double mass, double charge, World& world) : 
-    _name(name), 
-    _mass(mass), 
+Species::Species(std::string name, double mass, double charge, World& world) :
+    _name(name),
+    _mass(mass),
     _charge(charge),
     _x(0),
     _y(0),
@@ -15,7 +15,7 @@ Species::Species(std::string name, double mass, double charge, World& world) :
     _vy(0),
     _vz(0),
     _world(world),
-    _den(_world._ni, _world._nj, _world._nk)
+    _den(world._ni, world._nj, world._nk)
 {}
 
 /**
@@ -127,15 +127,15 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vec
  */
 void Species::resize_storage(const int& new_size) {
 
-    _x.conservativeResize(new_size);
-    _y.conservativeResize(new_size);
-    _z.conservativeResize(new_size);
+    _x.resize(new_size);
+    _y.resize(new_size);
+    _z.resize(new_size);
 
-    _vx.conservativeResize(new_size);
-    _vy.conservativeResize(new_size);
-    _vz.conservativeResize(new_size);
+    _vx.resize(new_size);
+    _vy.resize(new_size);
+    _vz.resize(new_size);
 
-    _mpwt.conservativeResize(new_size);
+    _mpwt.resize(new_size);
 }
 
 /**

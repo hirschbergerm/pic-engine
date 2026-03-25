@@ -14,6 +14,8 @@ World::World(const int& ni, const int& nj, const int& nk) :
     _rho(ni, nj, nk),
     _E(ni, nj, nk),
     _node_vol(ni, nj, nk),
+    _current_time(0.0),
+    _current_timestep(0),
     _start_time(std::chrono::high_resolution_clock::now())
     {}
 

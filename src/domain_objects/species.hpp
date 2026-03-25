@@ -28,26 +28,27 @@ class Species {
         const double _charge; 
         const double _mass;
 
-        Field<double> _den; // Number density field of the species
-
     private:
 
         void resize_storage(const int& new_size);
 
         // Storage for the particle velocities and positions
         // We are using a Data-Oriented Design approach, so NO arrays of structs
-        Eigen::VectorXd _x; // x coordinates of all the particles
-        Eigen::VectorXd _y; // y coordinates of all the particles
-        Eigen::VectorXd _z; // z coordinates of all the particles
+        std::vector<double> _x; // x coordinates of all the particles
+        std::vector<double> _y; // y coordinates of all the particles
+        std::vector<double> _z; // z coordinates of all the particles
 
-        Eigen::VectorXd _vx; // x velocities of all the particles
-        Eigen::VectorXd _vy; // y velocities of all the particles
-        Eigen::VectorXd _vz; // z velocities of all the particles
+        std::vector<double> _vx; // x velocities of all the particles
+        std::vector<double> _vy; // y velocities of all the particles
+        std::vector<double> _vz; // z velocities of all the particles
 
-        Eigen::VectorXd _mpwt; // macroparticle weights of all the particles
+        std::vector<double> _mpwt; // macroparticle weights of all the particles
 
         class World& _world; // Reference to the world object the species belongs to
         // Using a reference here to avoid circular dependencies and because Species should not exist without a World
+
+    public:
+        Field<double> _den; // Number density field of the species, defined on the grid nodes. This is public for now for easy access in output routines, but we may want to make this private and add a getter function later.
 };
 
 #endif // SPECIES_HPP
