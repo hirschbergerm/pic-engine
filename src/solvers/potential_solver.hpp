@@ -1,9 +1,8 @@
-#include "world.hpp"
-#include "field.hpp"
-#include <Eigen/Core>
-
+#pragma once
 #ifndef POTENTIAL_SOLVER_HPP
 #define POTENTIAL_SOLVER_HPP
+
+#include "world.hpp"
 
 class PotentialSolver {
     public:

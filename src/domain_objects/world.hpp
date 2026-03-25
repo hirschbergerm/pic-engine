@@ -1,11 +1,11 @@
-#include <Eigen/Core>
+#pragma once
+#ifndef WORLD_HPP
+#define WORLD_HPP
+
 #include <vector>
 #include <random>
 #include <chrono>
 #include "field.hpp"
-
-#ifndef WORLD_HPP
-#define WORLD_HPP
 
 // Not sure if I want this to be a pure singleton yet
 class World {
@@ -95,7 +95,7 @@ class World {
 class Rnd {
     public:
         Rnd() : _mt_gen{std::random_device()()}, _rnd_dist{0, 1.0} {};
-        ~Rnd();
+        ~Rnd() = default;
 
         Rnd(const Rnd& other) = delete; // Delete copy constructor
         Rnd& operator=(const Rnd& other) = delete; // Delete copy assignment operator

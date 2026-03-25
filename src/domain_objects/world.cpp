@@ -5,7 +5,7 @@
 /**
  * @brief Explicit constructor for the World class.
  */
-explicit World::World(const int& ni, const int& nj, const int& nk) : 
+World::World(const int& ni, const int& nj, const int& nk) : 
     _ni(ni), 
     _nj(nj), 
     _nk(nk), 
@@ -14,6 +14,8 @@ explicit World::World(const int& ni, const int& nj, const int& nk) :
     _rho(ni, nj, nk),
     _E(ni, nj, nk),
     _node_vol(ni, nj, nk),
+    _current_time(0.0),
+    _current_timestep(0),
     _start_time(std::chrono::high_resolution_clock::now())
     {}
 
@@ -135,7 +137,7 @@ bool::World::advance_time() {
 void World::get_potential_energy(double& pe) const {
 
     pe = 0.0;
-    Eigen::Vector3d ef{0.0};
+    Eigen::Vector3d ef{0.0, 0.0, 0.0};
 
     for (int i = 0; i < _ni; i++) {
         for (int j = 0; j < _nj; j++) {
@@ -151,3 +153,5 @@ void World::get_potential_energy(double& pe) const {
 
 }
 
+// Initialize the global random number generator
+Rnd global_rnd;
