@@ -1,16 +1,21 @@
 #include "output.hpp"
 #include <iostream>
 #include <iomanip>
+#include <filesystem>
 
 std::ofstream Output::f_diag; // Define the static member variable for diagnostics output file
 
 void Output::fields_output(World& world, std::vector<Species*>& species) {
     // Build filename
     std::stringstream name;
-    name<<"/results/fields_"<<std::setfill('0')<<std::setw(5)<<world.get_timestep()<<".vti";
+    name<<"./results/fields_"<<std::setfill('0')<<std::setw(5)<<world.get_timestep()<<".vti";
 
+    if (!std::filesystem::exists("./results")) {
+        std::filesystem::create_directory("./results");
+    }
     // open output file
-    std::ofstream file(name.str());
+    std::ofstream file;
+    file.open(name.str());
     if (!file.is_open()) {
         std::cerr<<"Error: Could not open file "<<name.str()<<" for writing."<<std::endl;
         return;
@@ -21,10 +26,10 @@ void Output::fields_output(World& world, std::vector<Species*>& species) {
     const Field<double>& node_volumes = world.get_node_volumes(); 
 
     // Header tags
-    file<<"VTKFile type=\"ImageData\">/n";
-    file<<"ImageData Origin=\""<<x_min(0)<<" "<<x_min(1)<<" "<<x_min(2)<<"\"";
-    file<<"Spacing=\""<<dh(0)<<" "<<dh(1)<<" "<<dh(2)<<"\"";
-    file<<"WholeExtent=\"0 "<<world._ni-1<<" 0 "<<world._nj-1<<" 0 "<<world._nk-1<<"\">/n";
+    file<<"<VTKFile type=\"ImageData\">\n";
+    file<<"<ImageData Origin=\""<<x_min(0)<<" "<<x_min(1)<<" "<<x_min(2)<<"\" ";
+    file<<"Spacing=\""<<dh(0)<<" "<<dh(1)<<" "<<dh(2)<<"\" ";
+    file<<"WholeExtent=\"0 "<<world._ni-1<<" 0 "<<world._nj-1<<" 0 "<<world._nk-1<<"\">\n";
 
     // output data stored on nodes 
     file<<"<PointData>\n";
@@ -57,9 +62,9 @@ void Output::fields_output(World& world, std::vector<Species*>& species) {
     file<<"</DataArray>\n";
 
     // Closing tags
-    file<<"</PointData>/n";
-    file<<"</ImageData>/n";
-    file<<"</VTKFile>/n";
+    file<<"</PointData>\n";
+    file<<"</ImageData>\n";
+    file<<"</VTKFile>\n";
 
     // Close the file explicitly
     file.close();

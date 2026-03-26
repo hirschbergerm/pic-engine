@@ -84,7 +84,7 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vec
     for (int i = 0; i < num_sim_particles[0]; i++) {
         for (int j = 0; j < num_sim_particles[1]; j++) {
             for (int k = 0; k < num_sim_particles[2]; k++) {
-                int p = i * num_sim_particles[0] + j * num_sim_particles[1] + k; // Generate a particle index. Order doesn't matter
+                int p = i * (num_sim_particles[1]*num_sim_particles[2]) + j * num_sim_particles[2] + k;
 
                 // Load particles in an equally spaced grid
                 _x[p] = box_min[0] + i * di;

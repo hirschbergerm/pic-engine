@@ -23,6 +23,7 @@ class World {
         Eigen::Vector3d get_dh() const;
         Eigen::Vector3d get_origin() const;
         Eigen::Vector3d get_xmax() const;
+        Eigen::Vector3d get_xcenter() const;
 
         const Field<double>& get_node_volumes() const;
 

@@ -45,6 +45,10 @@ Eigen::Vector3d World::get_xmax() const {
     return _xmax;
 }
 
+Eigen::Vector3d World::get_xcenter() const {
+    return _xc;
+}
+
 const Field<double>& World::get_node_volumes() const {
     return _node_vol;
 }

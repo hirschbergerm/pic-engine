@@ -15,13 +15,13 @@ int main(int argc, char* argv[]) {
     World world(21, 21, 21);
     world.set_extents(-0.1, -0.1, 0, 0.1, 0.1, 0.2);
     world.compute_node_volumes(); // Compute node volumes for the domain, needed for charge density calculation and output
-    world.set_time(2e-10, 10000);
+    world.set_time(2e-10, 200);
     std::cout << "Created World" << std::endl;
 
     // Set up particle species
     std::vector<Species*> species;
-    species.emplace_back(new Species("e-", Const::me, -Const::e, world)); // Electron species
     species.emplace_back(new Species("O+", Const::mp, Const::e, world)); // Proton species
+    species.emplace_back(new Species("e-", Const::me, -Const::e, world)); // Electron species
     std::cout << "Created Species" << std::endl;
 
     // Initialize potential solver and solve initial potential
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     // Load particles specifying number of simulation particles in each dimension
     species[0]->load_particles_box_quiet_start(world.get_origin(), world.get_xmax(), 1e11, {21, 21, 21});
-    species[1]->load_particles_box_quiet_start(world.get_origin(), world.get_xmax(), 1e11, {41, 41, 41});
+    species[1]->load_particles_box_quiet_start(world.get_origin(), world.get_xcenter(), 1e11, {41, 41, 41});
 
     // Compute initial number density fields for each species
     for (auto& sp : species) {
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         Output::diagnostic_output(world, species);
 
         // periodically write output files for visualization
-        if (world.get_timestep() % 100 == 0 || world.is_last_timestep()) {
+        if (world.get_timestep() % 10 == 0 || world.is_last_timestep()) {
             Output::fields_output(world, species);
         }
     }
