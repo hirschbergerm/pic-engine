@@ -30,33 +30,43 @@ auto PotentialSolver::solve() -> bool {
     double L2 = 0; // L2 norm
     bool converged = false;
 
+    double denom = 2.0*(idx2 + idy2 + idz2);
+
     // main solver loop
     for (unsigned int it = 0; it < _max_solver_it; it++) {
-        for(int i=1; i < nn[0]-1; i++) {
+
+        for(int k=1; k < nn[2]-1; k++) {
             for(int j=1; j < nn[1]-1; j++) {
-                for(int k=1; k < nn[2]-1; k++) {
+                for(int i=1; i < nn[0]-1; i++) {
+
+                    double rhs = rho(i,j,k)/Const::EPS_0;
                     // update step for internal node
-                    double phi_new = (rho(i,j,k)/Const::EPS_0 +
-                                      (phi(i+1,j,k) + phi(i-1,j,k)) * idx2 +
-                                      (phi(i,j+1,k) + phi(i,j-1,k)) * idy2 +
-                                      (phi(i,j,k+1) + phi(i,j,k-1)) * idz2) /
-                                     (2.0 * (idx2 + idy2 + idz2));
+                    double phi_new = (rhs +
+                            idx2*(phi(i+1,j,k) + phi(i-1,j,k)) +
+                            idy2*(phi(i,j+1,k) + phi(i,j-1,k)) +
+                            idz2*(phi(i,j,k+1) + phi(i,j,k-1)) ) / denom;
 
                     // SOR step
-                    phi(i,j,k) = phi(i,j,k) + 1.5 * (phi_new - phi(i,j,k));
+                    phi(i,j,k) = phi(i,j,k) + 1.4 * (phi_new - phi(i,j,k));
 
                 }
             }
         }
 
         if (it % 25 == 0) {
+            // Add these:
+            /** rho_max = *std::max_element(rho._data.begin(), rho._data.end());
+            double phi_max = *std::max_element(phi._data.begin(), phi._data.end());
+            std::cerr << "it=" << it << " L2=" << L2 << " rho_max=" << rho_max << " phi_max=" << phi_max << std::endl;
+            */
             double sum = 0;
-            for(int i=1; i < nn[0]-1; i++) {
+            for(int k=1; k < nn[2]-1; k++) {
                 for(int j=1; j < nn[1]-1; j++) {
-                    for(int k=1; k < nn[2]-1; k++) {
+                    for(int i=1; i < nn[0]-1; i++) {
+                        double rhs = rho(i,j,k)/Const::EPS_0;
                         // Calculate the residual
-                        double R = -phi(i,j,k)*(2*idx2 + 2*idy2 + 2*idz2) +
-                                    rho(i,j,k)/Const::EPS_0 + 
+                        double R = -phi(i,j,k)*denom +
+                                    rhs + 
                                     idx2*(phi(i-1,j,k) + phi(i+1,j,k)) +
                                     idy2*(phi(i,j-1,k) + phi(i,j+1,k)) +
                                     idz2*(phi(i,j,k-1) + phi(i,j,k+1));
@@ -93,9 +103,9 @@ auto PotentialSolver::compute_electric_field() -> void {
 
     const Eigen::Vector3d& dh = _world.get_dh();
 
-    for (int i=0; i<_world._nn[0]; i++) {
-        for (int j=0; j<_world._nn[1]; j++) {
-            for (int k=0; k<_world._nn[2]; k++) {
+    for (int k=0; k < _world._nn[2]; k++) {
+        for (int j=0; j < _world._nn[1]; j++) {
+            for (int i=0; i < _world._nn[0]; i++) {
                 // Get references to field components to update
                 double& Ex = E.x(i,j,k);
                 double& Ey = E.y(i,j,k);

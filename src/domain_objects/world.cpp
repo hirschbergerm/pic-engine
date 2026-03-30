@@ -72,9 +72,9 @@ void World::set_extents(const double& x1, const double& y1, const double& z1, co
     _xmax[2] = z2;
 
     // Compute the cell spacings
-    _dh[0] = (_xmax[0] - _x0[0]) / _ni; // You will need static_cast here
-    _dh[1] = (_xmax[1] - _x0[1]) / _nj;
-    _dh[2] = (_xmax[2] - _x0[2]) / _nk;
+    _dh[0] = (_xmax[0] - _x0[0]) / (_ni - 1); // You will need static_cast here
+    _dh[1] = (_xmax[1] - _x0[1]) / (_nj - 1);
+    _dh[2] = (_xmax[2] - _x0[2]) / (_nk - 1);
 
     // Compute the domain centroid
     // This is solely needed for loading the electron population
@@ -111,8 +111,8 @@ void World::compute_charge_density(const std::vector<Species*>& species) {
     for (const auto& sp : species) {
         if (sp->_charge == 0.0) continue; // Skip neutral species
 
-        sp->_den *= sp->_charge; // Scale density by charge to get charge density contribution from this species
-        _rho += sp->_den; // Add this species' contribution to the total charge density
+        //sp->_den *= sp->_charge; // Scale density by charge to get charge density contribution from this species
+        _rho += sp->_den * sp->_charge; // Add this species' contribution to the total charge density
 
     }
 

@@ -22,6 +22,8 @@ class Field {
         Field<T>& operator/=(const T& value); // Divide all field values by the passed value
         Field<T>& operator+=(const Field<T>& other); // Elementwise addition with another Field
         Field<T>& operator-=(const Field<T>& other); // Elementwise subtraction with another Field
+
+        Field<T>& operator*(const T& value); // Return a new Field that is the result of multiplying all field values by the passed value
         
         Field<T>& operator/=(const Field<T>& other); // Elementwise division by another Field
         
@@ -52,7 +54,7 @@ class Field {
         inline const size_t nk() const{
             return _nk;
         }
-        
+
     private:
         std::vector<T> _data; // 3D field data
 

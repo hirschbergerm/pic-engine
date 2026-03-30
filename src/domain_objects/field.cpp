@@ -68,6 +68,22 @@ Field<T>& Field<T>::operator*=(const T& value) {
 }
 
 /**
+ * @brief 
+ * 
+ * @param value The scalar value to multiply all field elements by.
+ * @return *this A reference to this field after the multiplication.
+ */
+template <typename T>
+Field<T>& Field<T>::operator*(const T& value) {
+
+    std::transform(_data.begin(), _data.end(), _data.begin(), [&value](T& element) {
+        return element * value; // Multiply each element by the passed value
+    });
+
+    return *this;
+}
+
+/**
  * @brief Divides all field values by the passed value.
  * 
  * @param value The value to divide all field elements by.

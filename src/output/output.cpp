@@ -21,6 +21,8 @@ void Output::fields_output(World& world, std::vector<Species*>& species) {
         return;
     }
 
+    std::cout << "Writing field output to " << name.str() << std::endl;
+
     Eigen::Vector3d x_min = world.get_origin();
     Eigen::Vector3d dh = world.get_dh();
     const Field<double>& node_volumes = world.get_node_volumes(); 

@@ -67,7 +67,7 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vec
     double box_volume = (box_max[0] - box_min[0]) * (box_max[1] - box_min[1]) * (box_max[2] - box_min[2]);
     int total_num_sim_particles = (num_sim_particles[0]-1) * (num_sim_particles[1]-1) * (num_sim_particles[2]-1);
     double num_real = num_density * box_volume; // Calculate the number of real particles that would be present
-    double mpw = total_num_sim_particles / num_real; // Calculate the macroparticle weight
+    double mpw = num_real / total_num_sim_particles; // Calculate the macroparticle weight
 
     // Compute spacing between particles in each dimension
     // You can imagine a box with num_sim_particles particles each a distance di apart.
@@ -81,10 +81,11 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vec
     double dt = _world.get_dt();
 
     // Begin loading particles on equally spaced grid
-    for (int i = 0; i < num_sim_particles[0]; i++) {
-        for (int j = 0; j < num_sim_particles[1]; j++) {
-            for (int k = 0; k < num_sim_particles[2]; k++) {
-                int p = i * (num_sim_particles[1]*num_sim_particles[2]) + j * num_sim_particles[2] + k;
+    for (int k = 0; k < num_sim_particles[2]-1; k++) {
+        for (int j = 0; j < num_sim_particles[1]-1; j++) {
+            for (int i = 0; i < num_sim_particles[0]-1; i++) {
+                
+                int p = i + j*(num_sim_particles[0]-1) + k*(num_sim_particles[0]-1)*(num_sim_particles[1]-1);
 
                 // Load particles in an equally spaced grid
                 _x[p] = box_min[0] + i * di;
@@ -100,7 +101,7 @@ void Species::load_particles_box_quiet_start(Eigen::Vector3d box_min, Eigen::Vec
                 // Assign weights
                 // We scale the particles on the domain edges by 0.5 to account for that fact that 
                 // edge node volumes are half of an internal node
-                double w = 1; // relative weight 
+                double w = 1; // relative weight to node size
                 if (i==0 || i==num_sim_particles[0] - 1) w*= 0.5;
                 if (j==0 || j==num_sim_particles[1] - 1) w*= 0.5;
                 if (k==0 || k==num_sim_particles[2] - 1) w*= 0.5;
