@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
 #include "constants.hpp"
 #include "world.hpp"
 #include "field.hpp"

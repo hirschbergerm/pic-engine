@@ -73,9 +73,11 @@ void Output::fields_output(World& world, std::vector<Species*>& species) {
 }
 
 void Output::screen_output(World &world, std::vector<Species*>& species) {
-    std::cout<<"time: "<<world.get_time();
+    size_t mp_count;
+    std::cout<<"timestep: "<<world.get_timestep();
     for (auto& sp : species) {
-        std::cout<<std::setprecision(3)<<"\t"<<sp->_name<<":"<<0;
+        sp->get_macroparticle_count(mp_count);
+        std::cout<<std::setprecision(3)<<"\t"<<sp->_name<<" macroparticle count:"<<mp_count;
     }
     std::cout<<std::endl;
 }
@@ -95,14 +97,15 @@ void Output::diagnostic_output(World& world, std::vector<Species*>& species) {
     f_diag<<world.get_timestep()<<","<<world.get_time()<<","<<world.get_wall_time(); // Write timestep, sim time, and wall time to file
 
     double tot_ke = 0.0;
-    double ke, px, py, pz, real_count, mp_count;
+    double ke, px, py, pz, real_count;
+    size_t mp_count;
 
     for (auto& sp : species) {
         
         sp->get_kinetic_energy(ke);
         sp->get_momentum(px, py, pz);
         sp->get_real_count(real_count);
-        sp->get_macro_particle_count(mp_count);
+        sp->get_macroparticle_count(mp_count);
         tot_ke += ke;
 
         f_diag<<","<<mp_count<<","<<real_count<<","<<ke<<","<<px<<","<<py<<","<<pz; // Write species diagnostics to file

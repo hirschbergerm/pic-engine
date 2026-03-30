@@ -256,7 +256,7 @@ void Species::get_momentum(double& px, double& py, double& pz) const {
     pz *= _mass;
 }
 
-void Species::get_macro_particle_count(double& mp_count) const {
+void Species::get_macroparticle_count(size_t& mp_count) const {
     mp_count = _x.size();
 }
 

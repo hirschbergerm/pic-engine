@@ -21,9 +21,8 @@ class Species {
 
         void get_kinetic_energy(double& ke) const;
         void get_momentum(double& px, double& py, double& pz) const;
-        void get_macro_particle_count(double& mp_count) const;
+        void get_macroparticle_count(size_t& mp_count) const;
         void get_real_count(double& real_count) const;
-
         const std::string _name;
         const double _charge; 
         const double _mass;
