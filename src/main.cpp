@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
     p_solver.compute_electric_field();
 
     // Load particles specifying number of simulation particles in each dimension
-    species[0]->load_particles_box_quiet_start(world.get_origin(), world.get_xmax(), 1e11, {21, 21, 21});
-    species[1]->load_particles_box_quiet_start(world.get_origin(), world.get_xcenter(), 1e11, {41, 41, 41});
+    species[0]->load_particles_box_quiet_start(world.get_origin(), world.get_xmax(), 1e11, {41, 41, 41});
+    species[1]->load_particles_box_quiet_start(world.get_origin(), world.get_xcenter(), 1e11, {21, 21, 21});
 
     // Compute initial number density fields for each species
     for (auto& sp : species) {
